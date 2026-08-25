@@ -1,0 +1,108 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>NESHER • Liberação de Chapas</title><style>
+:root{--bg:#090a0b;--p:#111214;--p2:#151618;--line:#765516;--gold:#f0bd28;--text:#f5f5f5;--muted:#9b9b9b;--green:#63c174}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 75% 10%,#18150d,#0b0c0d 40%,#070809);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;min-height:100vh}button,input,select,textarea{font:inherit}.app{display:flex;min-height:100vh}.sidebar{width:280px;background:linear-gradient(180deg,#111214,#0d0e10);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:20px 18px;position:fixed;left:0;top:0;bottom:0;z-index:10}.brand{height:105px;border:1px solid #6d5015;border-radius:17px;display:flex;align-items:center;padding:18px;gap:14px;margin-bottom:25px}.logo{width:62px;height:62px;border:2px solid var(--gold);border-radius:12px;display:grid;place-items:center;font-size:38px;font-weight:800;color:var(--gold);box-shadow:inset 0 0 20px #5a420d}.brand strong{font-size:23px;letter-spacing:3px;color:#f5c536}.brand span{display:block;font-size:11px;letter-spacing:4px;color:#f0c53b;margin-top:3px}.nav{display:flex;flex-direction:column;gap:6px}.nav button{border:1px solid transparent;background:transparent;color:#ddd;text-align:left;padding:15px 14px;border-radius:9px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:.2s;font-size:15px}.nav button:hover,.nav button.active{border-color:#9a711d;background:linear-gradient(90deg,#3a2a0d,#171512);color:#ffd449;box-shadow:0 0 20px #5b42151f}.icon{width:24px;text-align:center;font-size:20px}.profile{margin-top:auto;border:1px solid #594314;border-radius:8px;padding:14px;display:flex;gap:12px;align-items:center}.avatar{width:42px;height:42px;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;color:var(--gold);font-size:20px}.profile b{color:#ffd347;font-size:14px}.profile small{color:#aaa}main{margin-left:280px;width:calc(100% - 280px);padding:28px 30px 40px}.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}.kicker{color:#ffd03a;font-weight:700;font-size:12px;letter-spacing:1px}h1{margin:5px 0 4px;font-size:31px}.subtitle{color:#a7a7a7}.actions{display:flex;gap:13px;align-items:center}.circle-btn,.exit{background:#101113;border:1px solid #775817;color:#f8c932;border-radius:8px;height:46px;cursor:pointer}.circle-btn{width:46px;font-size:21px}.exit{padding:0 25px;color:#f2c43a}.card{background:linear-gradient(145deg,#121315,#0d0e10);border:1px solid #745516;border-radius:10px;box-shadow:0 12px 40px #0008}.form-card{padding:25px 27px 27px;margin-bottom:20px}.section-title{color:#ffce39;font-size:19px;font-weight:700;margin-bottom:6px}.section-sub{color:#9b9b9b;font-size:13px;margin-bottom:22px}.grid{display:grid;grid-template-columns:1.15fr 1.15fr .75fr .75fr;gap:21px 22px}.field label{display:block;font-size:14px;margin-bottom:8px}.field input,.field select,.field textarea{width:100%;background:#111214;border:1px solid #684b14;color:#ddd;border-radius:6px;padding:12px 13px;outline:none;min-height:42px}.field input:focus,.field select:focus,.field textarea:focus{border-color:#d9a92d;box-shadow:0 0 0 2px #d9a92d18}.form-action{grid-column:1/-1;display:flex;align-items:end;justify-content:flex-end;gap:12px}.gold-btn{min-width:220px;height:52px;border:1px solid #f1bd2e;border-radius:6px;background:linear-gradient(180deg,#dcae27,#a9760f);color:white;font-weight:600;cursor:pointer;box-shadow:0 0 18px #c28e1c2b}.gold-btn:hover{filter:brightness(1.1)}.gold-btn:disabled{opacity:.6;cursor:default}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}.stat{padding:19px 21px;display:flex;align-items:center;gap:16px;min-height:108px}.stat-icon{width:55px;height:55px;border:1px solid #9b7018;border-radius:50%;display:grid;place-items:center;color:#f5c12e;font-size:25px}.stat b{font-size:27px;color:#f4c235}.stat span{display:block;font-size:15px}.stat small{display:block;color:#8d8d8d;margin-top:5px}.table-card{padding:19px 10px 8px}.table-title-row{display:flex;justify-content:space-between;align-items:center;padding:0 14px 12px}.table-title{color:#ffd13b;font-size:18px;font-weight:700}.live-dot{display:inline-flex;align-items:center;gap:7px;color:#8d8d8d;font-size:12px}.live-dot i{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;box-shadow:0 0 8px var(--green)}.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:900px}.table th{text-align:left;color:#f1c433;font-size:13px;padding:10px 14px;border-bottom:1px solid #614716}.table td{padding:13px 14px;border-bottom:1px solid #2e2c28;color:#d5d5d5;font-size:14px}.table tr:hover td{background:#171614}.empty-row td{text-align:center;color:#8d8d8d;padding:30px}.toast{position:fixed;right:25px;bottom:25px;background:#171818;border:1px solid #c29420;color:#fff;padding:15px 20px;border-radius:8px;display:none;z-index:50;box-shadow:0 10px 35px #000}@media(max-width:1100px){.grid{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr 1fr}}@media(max-width:760px){.sidebar{width:76px;padding:12px 8px}.brand{height:70px;padding:8px;justify-content:center}.brand>div:not(.logo),.nav span:not(.icon),.profile>div:not(.avatar){display:none}.logo{width:52px;height:52px}main{margin-left:76px;width:calc(100% - 76px);padding:18px 13px}.topbar{align-items:flex-start}h1{font-size:24px}.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr}.form-card{padding:20px 16px}}
+</style></head><body><div class="app"><aside class="sidebar"><div class="brand"><div class="logo">N</div><div><strong>NESHER</strong><span>INDÚSTRIA</span></div></div><nav class="nav"><button class="active"><span class="icon">▣</span><span>Liberação de Chapas</span></button><button onclick="toast('Em breve')"><span class="icon">▤</span><span>Cadastro de Chapas</span></button><button onclick="toast('Em breve')"><span class="icon">▣</span><span>Ordens de Produção</span></button><button onclick="toast('Em breve')"><span class="icon">◇</span><span>Estoque</span></button><button onclick="toast('Em breve')"><span class="icon">↶</span><span>Histórico de Liberações</span></button><button onclick="toast('Em breve')"><span class="icon">▥</span><span>Relatórios</span></button></nav><div class="profile"><div class="avatar">♙</div><div><b>Estevão Silva</b><br><small>Administrador</small></div></div></aside><main><header class="topbar"><div><div class="kicker">NESHER • PPCP</div><h1>LIBERAÇÃO DE CHAPAS</h1><div class="subtitle">Conectado à planilha "CHAPAS POR LOTE" em tempo real</div></div><div class="actions"><button class="circle-btn" onclick="carregarTudo(true)" title="Atualizar">⟳</button><button class="exit" onclick="toast('Sessão encerrada')">↪ &nbsp; Sair</button></div></header><section class="card form-card"><div class="section-title">NOVA LIBERAÇÃO</div><div class="section-sub">Registrar aqui grava direto na planilha — a linha aparece assim que ela for salva.</div><form id="form"><div class="grid"><div class="field"><label>Ordem de Produção (OP)</label><input id="op" placeholder="Ex: N26107"></div><div class="field"><label>Tipo de Chapa</label><select id="tipo_chapa"><option value="">Selecione o tipo</option></select></div><div class="field"><label>Qtde Chapas Liberadas</label><input id="qtde" type="number" min="1" placeholder="Ex: 100"></div><div class="field"><label>Perda (%) — opcional</label><input id="perda" type="number" step="0.01" placeholder="Ex: 5.5"></div><div class="form-action"><button class="gold-btn" id="btnSubmit">➤ &nbsp; Liberar Chapa</button></div></div></form></section><section class="stats"><div class="card stat"><div class="stat-icon">▱</div><div><b id="statHoje">—</b><span>Chapas Liberadas</span><small>Hoje</small></div></div><div class="card stat"><div class="stat-icon">▣</div><div><b id="statOps">—</b><span>OPs Atendidas</span><small>Hoje</small></div></div><div class="card stat"><div class="stat-icon">▱</div><div><b id="statTotal">—</b><span>Total Liberado</span><small>Histórico</small></div></div><div class="card stat"><div class="stat-icon">◷</div><div><b id="statRegistros">—</b><span>Registros</span><small>na planilha</small></div></div></section><section class="card table-card"><div class="table-title-row"><div class="table-title">LIBERAÇÕES RECENTES</div><div class="live-dot"><i></i>ligado à planilha</div></div><div class="table-wrap"><table class="table"><thead><tr><th>Data</th><th>OP</th><th>Fábrica</th><th>Tipo de Chapa</th><th>M² da Chapa</th><th>Qtde Liberada</th><th>Perda %</th><th>M² Total</th></tr></thead><tbody id="tbody"><tr class="empty-row"><td colspan="8">Carregando...</td></tr></tbody></table></div></section></main></div><div class="toast" id="toast"></div><script>
+const API = ''; // mesma origem (o backend serve esta página)
+let timer;
+function toast(m){const x=document.getElementById('toast');x.textContent=m;x.style.display='block';clearTimeout(timer);timer=setTimeout(()=>x.style.display='none',2600)}
+
+function fmtData(iso){
+  if(!iso) return '—';
+  const d = new Date(iso);
+  if(isNaN(d)) return iso;
+  return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+function fmtNum(n, casas=0){
+  if(n===null||n===undefined||n==='') return '—';
+  return Number(n).toLocaleString('pt-BR',{minimumFractionDigits:casas,maximumFractionDigits:casas});
+}
+
+async function carregarTipos(){
+  try{
+    const r = await fetch(API+'/api/tipos-chapa');
+    const tipos = await r.json();
+    const sel = document.getElementById('tipo_chapa');
+    tipos.forEach(t=>{
+      const opt = document.createElement('option');
+      opt.value = t; opt.textContent = t;
+      sel.appendChild(opt);
+    });
+  }catch(e){ console.error(e); }
+}
+
+async function carregarLiberacoes(){
+  const tbody = document.getElementById('tbody');
+  try{
+    const r = await fetch(API+'/api/liberacoes?limit=30');
+    const linhas = await r.json();
+    if(!linhas.length){
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="8">Nenhuma liberação encontrada na planilha.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = linhas.map(l => `<tr>
+      <td>${fmtData(l.data)}</td>
+      <td>${l.op ?? '—'}</td>
+      <td>${l.fabrica ?? '—'}</td>
+      <td>${l.tipo_chapa ?? '—'}</td>
+      <td>${fmtNum(l.m2_chapa,2)}</td>
+      <td>${fmtNum(l.qtde_chapas_liberadas,0)}</td>
+      <td>${l.perda_pct!=null ? (Number(l.perda_pct)*100).toLocaleString('pt-BR',{maximumFractionDigits:2})+'%' : '—'}</td>
+      <td>${fmtNum(l.m2_total,2)}</td>
+    </tr>`).join('');
+  }catch(e){
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">Não consegui carregar a planilha. Verifique se o backend está rodando.</td></tr>';
+  }
+}
+
+async function carregarStats(){
+  try{
+    const r = await fetch(API+'/api/stats');
+    const s = await r.json();
+    document.getElementById('statHoje').textContent = fmtNum(s.chapas_liberadas_hoje,0);
+    document.getElementById('statOps').textContent = fmtNum(s.ops_atendidas_hoje,0);
+    document.getElementById('statTotal').textContent = fmtNum(s.total_chapas_liberadas,0);
+    document.getElementById('statRegistros').textContent = fmtNum(s.total_registros,0);
+  }catch(e){ /* silencioso */ }
+}
+
+async function carregarTudo(manual){
+  await Promise.all([carregarLiberacoes(), carregarStats()]);
+  if(manual) toast('Atualizado a partir da planilha');
+}
+
+document.getElementById('form').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const op = document.getElementById('op').value.trim();
+  const tipo_chapa = document.getElementById('tipo_chapa').value;
+  const qtde = parseFloat(document.getElementById('qtde').value);
+  const perdaRaw = document.getElementById('perda').value;
+  const perda_pct = perdaRaw ? parseFloat(perdaRaw)/100 : null;
+
+  if(!op || !tipo_chapa || !qtde){
+    return toast('Preencha OP, Tipo de Chapa e Quantidade.');
+  }
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled = true;
+  try{
+    const r = await fetch(API+'/api/liberacoes', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({op, tipo_chapa, qtde_chapas: qtde, perda_pct})
+    });
+    if(!r.ok){
+      const err = await r.json().catch(()=>({detail:'Erro ao gravar na planilha'}));
+      throw new Error(err.detail || 'Erro ao gravar na planilha');
+    }
+    toast('Chapa liberada e gravada na planilha!');
+    e.target.reset();
+    await carregarTudo(false);
+  }catch(err){
+    toast(err.message);
+  }finally{
+    btn.disabled = false;
+  }
+});
+
+carregarTipos();
+carregarTudo(false);
+setInterval(()=>carregarTudo(false), 15000); // reflete edições feitas direto na planilha
+</script></body></html>
