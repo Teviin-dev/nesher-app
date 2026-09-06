@@ -296,20 +296,7 @@ body.mobile-mode .modal-box{padding:16px;border-radius:12px}
       <div id="loginError" class="login-error" style="min-height:32px;line-height:1.35"></div>
       <button class="btn primary" style="width:100%;margin-top:4px" type="submit">Entrar</button>
     </form>
-
-    <details class="db-config">
-      <summary>Configuração do Supabase (já configurado)</summary>
-      <div class="login-field"><label>PROJECT URL</label><input id="supabaseUrl" value="https://ltsescnvycxkxokyauen.supabase.co" placeholder="https://xxxx.supabase.co"></div>
-      <div class="login-field"><label>ANON / PUBLISHABLE KEY</label><input id="supabaseKey" type="password" placeholder="Cole a chave pública do projeto"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
-        <button class="btn primary" type="button" onclick="saveSupabaseConfig()">Salvar conexão</button>
-        <button class="btn" type="button" onclick="testSupabaseConnection()">Testar conexão</button>
-      </div>
-      <div id="dbStatus" class="login-error" style="color:#9ef0aa;min-height:38px;text-align:left">✓ Supabase configurado automaticamente.</div><div style="font-size:10px;color:#8e8e8e;line-height:1.4;margin-top:6px">Use somente a <b>Publishable key</b>. Nunca cole uma Secret key/service_role aqui.</div>
-    </details>
-
-    <div class="login-hint"><b>Acessos locais de teste:</b><br>Operador de Empilhadeira: <b>1234</b><br>Operador do Corte: <b>1234</b><br>Administrador: <b>nesher2026</b><br><br>Informe também o nome do usuário. A assinatura será gravada como <b>Nome - PERFIL</b>. O administrador acompanha separadamente Empilhadeira e Corte.</div>
-  </div>
+</div>
 </div>
 
 <div class="app">
@@ -332,8 +319,7 @@ body.mobile-mode .modal-box{padding:16px;border-radius:12px}
       <button data-admin-only onclick="linkSpreadsheet()">⛓ Vincular planilha</button>
       <button data-admin-only onclick="refreshLinked()">↻ Atualizar planilha</button>
     </div>
-    <div class="status-box"><span class="dot"></span><b>Sistema pronto</b><br>O Administrador pode carregar várias planilhas sem apagar as anteriores. Empilhadeira e Corte enxergam os mesmos lotes, mas possuem fichas operacionais independentes.</div>
-  </aside>
+</aside>
 
   <main class="main">
     <input id="fileInput" type="file" accept=".xlsx,.xls" multiple hidden />
