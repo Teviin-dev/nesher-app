@@ -63,5 +63,6 @@ Esse pacote conecta a tela de Liberação de Chapas direto à sua planilha
   linhas também estão em branco ali).
 - Isso está rodando localmente, como protótipo. Pra deixar isso no ar de
   forma permanente no servidor da empresa (ligado, reiniciando sozinho se
+  Deploy Vercel conectado
   cair, etc.), o ideal é rodar como serviço do Windows/Linux — posso te
   ajudar a montar isso quando vocês estiverem prontos para produção.
