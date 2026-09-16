@@ -271,8 +271,79 @@ body.mobile-mode .modal-box{padding:16px;border-radius:12px}
   body.mobile-mode .brand img{width:120px}
 }
 
+
+/* V18 - INTERFACE PILOTO */
+.operator-strip{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#111214;border:1px solid #302a1f;border-radius:12px;padding:12px 14px;margin-bottom:12px}
+.operator-strip-label{font-size:10px;color:var(--muted);letter-spacing:1px}
+.operator-strip strong{display:block;margin-top:3px;color:#fff;font-size:14px}
+.sync-indicator{font-size:10px;font-weight:900;letter-spacing:.6px;padding:6px 9px;border-radius:999px}
+.sync-indicator.synced{color:#a9f3b4;border:1px solid #2f6d3c;background:#102317}
+.sync-indicator.saving{color:#ffe27a;border:1px solid #725c20;background:#241d0d}
+.sync-indicator.error{color:#ffaaa9;border:1px solid #713535;background:#271111}
+.operation-summary{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.op-summary-card{background:linear-gradient(180deg,#151618,#0e0f10);border:1px solid #2d291f;border-radius:12px;padding:13px}
+.op-summary-card span{display:block;font-size:10px;color:var(--muted);letter-spacing:.8px}
+.op-summary-card strong{display:block;margin-top:7px;font-size:24px}
+.op-summary-card.balance-card{border-color:#80651f;background:linear-gradient(180deg,#211b0d,#121109)}
+.op-summary-card.balance-card strong{color:var(--gold2);font-size:29px}
+.add-row-cell{background:#111214!important;border:0!important;padding:10px!important;text-align:center}
+.add-movement{min-width:210px}
+.history-panel{margin-top:16px;background:#111214;border:1px solid #2c281e;border-radius:12px;padding:14px}
+.history-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+.history-head strong{font-size:12px;color:var(--gold2)}
+.history-head span{font-size:11px;color:var(--muted)}
+.history-list{display:grid;gap:7px}
+.history-item{display:grid;grid-template-columns:100px 1fr minmax(220px,1.5fr);gap:8px;align-items:center;padding:9px 10px;border:1px solid #282820;border-radius:9px;background:#0d0e0f;font-size:12px}
+.history-item .h-label{color:var(--muted);font-size:9px;display:block;margin-bottom:2px}
+.empty-history{padding:14px;text-align:center;color:var(--muted);font-size:12px}
+.locked-record{opacity:.78}
+.locked-record input,.locked-record textarea{pointer-events:none}
+.mobile-action-bar{display:none}
+body.mobile-mode .operator-strip{position:sticky;top:0;z-index:8;border-radius:0;margin:0 -12px 10px;padding:10px 12px}
+body.mobile-mode .operation-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+body.mobile-mode .op-summary-card{padding:10px}
+body.mobile-mode .op-summary-card strong{font-size:21px}
+body.mobile-mode .op-summary-card.balance-card strong{font-size:26px}
+body.mobile-mode .sheet{min-width:0;width:100%;table-layout:auto;background:transparent;box-shadow:none}
+body.mobile-mode .sheet colgroup{display:none}
+body.mobile-mode .sheet>tbody#movementRows{display:block}
+body.mobile-mode #movementRows .mov{display:grid;grid-template-columns:1fr 1fr;gap:7px;background:#f5f5f5;border-radius:10px;padding:9px;margin-bottom:8px;border:1px solid #ddd}
+body.mobile-mode #movementRows .mov td{display:block;height:auto;border:0!important;background:#fff!important;border-radius:7px;padding:7px}
+body.mobile-mode #movementRows .mov td::before{display:block;font-size:9px;font-weight:800;color:#666;margin-bottom:4px}
+body.mobile-mode #movementRows .mov td:nth-child(1)::before{content:'DATA'}
+body.mobile-mode #movementRows .mov td:nth-child(2)::before{content:'CHAPAS'}
+body.mobile-mode #movementRows .mov td:nth-child(3)::before{content:'RESPONSÁVEL'}
+body.mobile-mode #movementRows .mov td:nth-child(3){grid-column:1/-1}
+body.mobile-mode .sheet tr:not(.mov){display:table-row}
+body.mobile-mode .sheet .mov-head{display:none}
+body.mobile-mode .date-icon-only{width:100%!important;max-width:none!important;color:#111!important}
+body.mobile-mode .date-icon-only::-webkit-datetime-edit,
+body.mobile-mode .date-icon-only::-webkit-datetime-edit-fields-wrapper,
+body.mobile-mode .date-icon-only::-webkit-datetime-edit-text,
+body.mobile-mode .date-icon-only::-webkit-datetime-edit-month-field,
+body.mobile-mode .date-icon-only::-webkit-datetime-edit-day-field,
+body.mobile-mode .date-icon-only::-webkit-datetime-edit-year-field{display:inline}
+body.mobile-mode .history-item{grid-template-columns:1fr 1fr}
+body.mobile-mode .history-item>div:last-child{grid-column:1/-1}
+body.mobile-mode .mobile-action-bar{display:grid;grid-template-columns:auto 1fr 1fr;gap:7px;align-items:center;position:sticky;bottom:0;z-index:30;margin:12px -12px -28px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(8,9,10,.97);border-top:1px solid #3a3120;backdrop-filter:blur(10px)}
+body.mobile-mode .mobile-action-bar .btn{padding:11px 8px;font-size:11px}
+.mobile-sync{display:flex;flex-direction:column;align-items:center;font-size:9px;color:var(--muted)}
+.mobile-sync span:first-child{font-size:14px;color:#56cf6e}
+@media(max-width:650px){.operation-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.history-item{grid-template-columns:1fr 1fr}}
+
+
+.pwa-installed{display:inline-flex;align-items:center;gap:6px;border:1px solid #2e6d3a;background:#112317;color:#b9f5c3;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:800}
+body.mobile-mode #installPwaTopBtn{padding:7px 9px;font-size:10px}
+
 @media print{body{background:white}.sidebar,.topbar,.grid-kpi,.toolbar,.sheet-toolbar,.note,.info-panel{display:none!important}.app{display:block}.main{padding:0}.workspace{display:block!important}.overview{display:none!important}.sheet-wrap{border:0;padding:0;background:white}.sheet{box-shadow:none;width:100%;min-width:0}.sheet th,.sheet td{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style>
+
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="application-name" content="NESHER Controle de Chapas">
+<meta name="apple-mobile-web-app-title" content="NESHER Chapas">
+<meta name="mobile-web-app-capable" content="yes">
+
 </head>
 <body>
 
@@ -315,6 +386,7 @@ body.mobile-mode .modal-box{padding:16px;border-radius:12px}
       <button id="navDashboard" class="active" onclick="setView('all')">▦ Dashboard / Todos os lotes</button>
       <button id="navOpen" onclick="setView('open')">◷ Lotes em aberto</button>
       <button id="navDone" data-admin-only onclick="setView('done')">✓ Concluídos</button>
+      <button id="installPwaBtn" style="display:none" onclick="installPWA()">⬇ Instalar aplicativo</button>
       <button data-admin-only onclick="document.getElementById('fileInput').click()">↥ Importar planilha</button>
       <button data-admin-only onclick="linkSpreadsheet()">⛓ Vincular planilha</button>
       <button data-admin-only onclick="refreshLinked()">↻ Atualizar planilha</button>
@@ -326,7 +398,7 @@ body.mobile-mode .modal-box{padding:16px;border-radius:12px}
     <section id="overview" class="overview active">
       <div class="topbar">
         <div><h2>Controle de Chapas</h2><p>Fichas geradas automaticamente a partir da planilha Excel, no padrão NESHER.</p></div>
-        <span id="deviceModeBadge" class="desktop-badge">VERSÃO DESKTOP</span><span id="cloudBadge" class="cloud-pill offline">BANCO LOCAL</span>
+        <span id="deviceModeBadge" class="desktop-badge">VERSÃO DESKTOP</span><span id="cloudBadge" class="cloud-pill offline">BANCO LOCAL</span><button id="installPwaTopBtn" class="btn" style="display:none" onclick="installPWA()">Instalar app</button>
         <div class="actions"><button data-admin-only class="btn" onclick="linkSpreadsheet()">Vincular Excel</button><button data-admin-only class="btn primary" onclick="document.getElementById('fileInput').click()">Importar Excel</button></div>
       </div>
       <div class="grid-kpi">
@@ -371,11 +443,26 @@ body.mobile-mode .modal-box{padding:16px;border-radius:12px}
         <div class="actions">
           <button class="btn" onclick="showOverview()">← Voltar</button>
           <button class="btn" onclick="saveCurrent()">Salvar alterações</button>
-          <button id="finalizeBtn" class="btn success" onclick="toggleFinalizeCurrent(true)">✓ Finalizar lote</button>
+          <button id="finalizeBtn" class="btn success" onclick="requestFinalize()">✓ Finalizar lote</button>
           <button id="reopenBtn" class="btn warn" style="display:none" onclick="toggleFinalizeCurrent(false)">↺ Reabrir lote</button>
           <button class="btn primary" onclick="window.print()">Imprimir ficha</button>
         </div>
       </div>
+      <div class="operator-strip">
+        <div>
+          <div class="operator-strip-label">USUÁRIO EM OPERAÇÃO</div>
+          <strong id="operatorIdentity">—</strong>
+        </div>
+        <div id="syncIndicator" class="sync-indicator synced">✓ SINCRONIZADO</div>
+      </div>
+
+      <div class="operation-summary">
+        <div class="op-summary-card"><span>QUANTIDADE INICIAL</span><strong id="sumInitial">0</strong></div>
+        <div class="op-summary-card"><span>CONSUMIDO</span><strong id="sumUsed">0</strong></div>
+        <div class="op-summary-card balance-card"><span>SALDO RESTANTE</span><strong id="sumBalance">0</strong></div>
+        <div class="op-summary-card"><span>STATUS</span><strong id="sumStatus">EM ABERTO</strong></div>
+      </div>
+
       <div class="sheet-wrap">
         <div class="sheet-toolbar">
           <div class="sheet-title"><span class="badge">FICHA OPERACIONAL</span><strong id="currentLabel"></strong><span id="currentRoleBadge" class="badge open"></span></div>
@@ -385,25 +472,34 @@ body.mobile-mode .modal-box{padding:16px;border-radius:12px}
           </div>
         </div>
         <table class="sheet">
-          <colgroup><col style="width:20%"><col style="width:24%"><col style="width:24%"><col style="width:32%"></colgroup>
-          <tr><th class="black">LOTE</th><th class="black">PRODUTO</th><th class="black" colspan="2">DESCRIÇÃO</th></tr>
-          <tr><td class="value" id="vLot"></td><td class="value" id="vProduct"></td><td class="value" id="vDesc" colspan="2"></td></tr>
-          <tr class="spacer"><td colspan="4"></td></tr>
-          <tr><td class="qty-label">QUANTIDADE INICIAL</td><td class="qty-value editable" colspan="3"><input id="vInitialQty" type="number" step="0.01" oninput="markDirty();updateBalanceUI()"><div class="admin-note">Somente administrador pode alterar</div></td></tr>
-          <tr><td class="qty-label" style="background:#f0bd28">QUANTIDADE DE CHAPAS</td><td class="qty-value" colspan="3" style="background:#f7d978"><input id="vQty" type="text" readonly style="font-size:22px;font-weight:900"></td></tr>
-          <tr class="spacer"><td colspan="4"></td></tr>
-          <tr><th class="mov-head">DATA</th><th class="mov-head">QUANTIDADE PACOTE</th><th class="mov-head">QUANTIDADE CHAPA</th><th class="mov-head">ASS. RESPONSÁVEL</th></tr>
+          <colgroup><col style="width:22%"><col style="width:28%"><col style="width:50%"></colgroup>
+          <tr><th class="black">LOTE</th><th class="black">PRODUTO</th><th class="black">DESCRIÇÃO</th></tr>
+          <tr><td class="value" id="vLot"></td><td class="value" id="vProduct"></td><td class="value" id="vDesc"></td></tr>
+          <tr class="spacer"><td colspan="3"></td></tr>
+          <tr><td class="qty-label">QUANTIDADE INICIAL</td><td class="qty-value editable" colspan="2"><input id="vInitialQty" type="number" step="0.01" oninput="markDirty();updateBalanceUI()"><div class="admin-note">Somente administrador pode alterar</div></td></tr>
+          <tr><td class="qty-label" style="background:#f0bd28">QUANTIDADE DE CHAPAS</td><td class="qty-value" colspan="2" style="background:#f7d978"><input id="vQty" type="text" readonly style="font-size:22px;font-weight:900"></td></tr>
+          <tr class="spacer"><td colspan="3"></td></tr>
+          <tr><th class="mov-head">DATA</th><th class="mov-head">QUANTIDADE DE CHAPAS</th><th class="mov-head">ASS. RESPONSÁVEL</th></tr>
           <tbody id="movementRows"></tbody>
-          <tr class="spacer"><td colspan="4"></td></tr>
-          <tr><td class="conclusion-label">CONCLUSÃO:</td><td class="conclusion editable" colspan="3"><textarea id="vConclusion" oninput="markDirty()"></textarea></td></tr>
+          <tbody><tr><td colspan="3" class="add-row-cell"><button id="addMovementBtn" class="btn add-movement" type="button" onclick="showNextMovementRow()">＋ Novo apontamento</button></td></tr></tbody>
+          <tr class="spacer"><td colspan="3"></td></tr>
+          <tr><td class="conclusion-label">CONCLUSÃO:</td><td class="conclusion editable" colspan="2"><textarea id="vConclusion" oninput="markDirty()"></textarea></td></tr>
         </table>
         <div class="info-panel">
-          <div class="info-box"><div class="small">Regra do produto</div><div class="big" id="ruleText">—</div></div>
+          <div class="info-box"><div class="small">Modo de apontamento</div><div class="big" id="ruleText">Quantidade de chapas</div></div>
           <div class="info-box"><div class="small">Saldo restante</div><div class="big" id="balanceText">—</div></div>
           <div class="info-box"><div class="small">Status do lote</div><div class="big" id="statusText">Em aberto</div></div>
           <div class="info-box"><div class="small">Finalizado em</div><div class="big" id="completedAtText">—</div></div>
         </div>
-        <div class="note">A <b>QUANTIDADE DE CHAPAS</b> é atualizada automaticamente considerando <b>pacotes × regra do produto + quantidade de chapas informada</b>. A <b>QUANTIDADE INICIAL</b> só pode ser alterada pelo <b>Administrador</b>. A assinatura é preenchida automaticamente como <b>Nome - Perfil</b>. As fichas da Empilhadeira e do Corte são independentes entre si. O sistema pausa a atualização automática enquanto você estiver digitando para não interromper o preenchimento. Use <b>Salvar alterações</b> para manter os apontamentos neste navegador. Ao reimportar a planilha, os dados do Excel são atualizados sem apagar os apontamentos salvos para o mesmo lote. Ao clicar em <b>Finalizar lote</b>, ele passa automaticamente para a aba <b>Concluídos</b>.</div>
+        <div class="history-panel">
+          <div class="history-head"><strong>HISTÓRICO DE APONTAMENTOS</strong><span id="historyCount">0 registros</span></div>
+          <div id="movementHistory" class="history-list"><div class="empty-history">Nenhum apontamento realizado.</div></div>
+        </div>
+      </div>
+      <div id="mobileActionBar" class="mobile-action-bar">
+        <div class="mobile-sync"><span id="mobileSyncDot">●</span><span id="mobileSyncText">Sincronizado</span></div>
+        <button class="btn primary" onclick="saveCurrent()">Salvar apontamento</button>
+        <button id="mobileFinalizeBtn" class="btn success" onclick="requestFinalize()">Finalizar</button>
       </div>
     </section>
   </main>
@@ -637,11 +733,10 @@ async function pullFromSupabase(){
         .sort((a,b)=>a.row_index-b.row_index)
         .map(m=>({
           date:m.movement_date||'',
-          package:m.package_qty??'',
           sheetQty:m.sheet_qty??'',
           responsible:m.responsible||''
         }));
-      while(movements.length<8)movements.push({date:'',package:'',sheetQty:'',responsible:''});
+      while(movements.length<8)movements.push({date:'',sheetQty:'',responsible:''});
       entry.roles[rec.role]={
         dbId:rec.id,
         movements:movements.slice(0,8),
@@ -699,7 +794,7 @@ async function pushRoleRecordToSupabase(x,role,rec){
   const rows=(rec.movements||[]).map((m,i)=>({
     record_id:recordId,row_index:i,
     movement_date:m.date||null,
-    package_qty:Number(String(m.package||0).replace(',','.'))||0,
+    package_qty:0,
     sheet_qty:Number(String(m.sheetQty||0).replace(',','.'))||0,
     responsible:m.responsible||null
   }));
@@ -766,6 +861,50 @@ document.addEventListener('focusout',()=>{
     }
   },250);
 });
+
+
+let deferredPwaPrompt=null;
+
+function isStandalonePWA(){
+  return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone===true;
+}
+function updatePwaInstallUI(){
+  const installed=isStandalonePWA();
+  const show=!!deferredPwaPrompt && !installed;
+  const a=document.getElementById('installPwaBtn');
+  const b=document.getElementById('installPwaTopBtn');
+  if(a)a.style.display=show?'':'none';
+  if(b)b.style.display=show?'inline-flex':'none';
+}
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredPwaPrompt=e;
+  updatePwaInstallUI();
+});
+window.addEventListener('appinstalled',()=>{
+  deferredPwaPrompt=null;
+  updatePwaInstallUI();
+  showMsg('Aplicativo instalado','NESHER Controle de Chapas foi instalado neste dispositivo.');
+});
+async function installPWA(){
+  if(isStandalonePWA()){
+    showMsg('Aplicativo já instalado','O sistema já está sendo executado como aplicativo.');
+    return;
+  }
+  if(!deferredPwaPrompt){
+    showMsg('Instalação','No celular, use o menu do navegador e escolha <b>Adicionar à tela inicial</b> ou <b>Instalar aplicativo</b>.');
+    return;
+  }
+  deferredPwaPrompt.prompt();
+  try{await deferredPwaPrompt.userChoice}catch(e){}
+  deferredPwaPrompt=null;
+  updatePwaInstallUI();
+}
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/sw.js').catch(err=>console.error('Service Worker:',err));
+  });
+}
 
 function roleLabel(role){
   if(role==='cut') return 'OPERADOR DO CORTE';
@@ -898,7 +1037,7 @@ function lotKey(x){
 function normalizeStatus(v){return v==='done'?'done':'open'}
 function emptyRoleRecord(){
   return {
-    movements:Array.from({length:8},()=>({date:'',package:'',sheetQty:'',responsible:''})),
+    movements:Array.from({length:8},()=>({date:'',sheetQty:'',responsible:''})),
     conclusion:'',status:'open',completedAt:'',updatedAt:'',lastUser:'',lastRole:''
   };
 }
@@ -1065,12 +1204,10 @@ function formatNumber(n){
   return Number.isInteger(n)?String(n):n.toFixed(2).replace('.',',');
 }
 function calcRecord(x,rec){
-  const packSize=getPackageSize(x.product||x.sheet)||0;
-  const packs=(rec.movements||[]).reduce((s,m)=>s+(Number(String(m.package||0).replace(',','.'))||0),0);
   const sheets=(rec.movements||[]).reduce((s,m)=>s+(Number(String(m.sheetQty||0).replace(',','.'))||0),0);
   const initial=Number(String(x.qty||0).replace(',','.'))||0;
-  const used=packs*packSize+sheets;
-  return {packSize,packs,sheets,initial,used,balance:initial-used};
+  const used=sheets;
+  return {sheets,initial,used,balance:initial-used};
 }
 function renderLots(){
   const q=(document.getElementById('search').value||'').toLowerCase().trim();
@@ -1139,15 +1276,20 @@ function openLot(i){
   document.getElementById('movementRows').innerHTML=Array.from({length:8},(_,r)=>{
     const m=(rec.movements||[])[r]||{};
     return `<tr class="mov">
-      <td class="editable"><input class="date-icon-only" type="date" value="${dateInputValue(m.date)}" data-r="${r}" data-f="date" title="Selecionar data" onchange="stampResponsible(${r});markDirty()"></td>
-      <td class="editable"><input type="number" step="0.01" min="0" value="${escapeAttr(m.package||'')}" data-r="${r}" data-f="package" oninput="stampResponsible(${r});markDirty();updateBalanceUI()"></td>
-      <td class="editable"><input type="number" step="0.01" min="0" value="${escapeAttr(m.sheetQty||'')}" data-r="${r}" data-f="sheetQty" oninput="stampResponsible(${r});markDirty();updateBalanceUI()"></td>
+      <td class="editable"><input class="date-icon-only" type="date" value="${dateInputValue(m.date)}" data-r="${r}" data-f="date" title="Selecionar data" onchange="stampResponsible(${r});markDirty();renderMovementHistory()"></td>
+      <td class="editable"><input type="number" step="0.01" min="0" value="${escapeAttr(m.sheetQty||'')}" data-r="${r}" data-f="sheetQty" oninput="stampResponsible(${r});markDirty();updateBalanceUI();renderMovementHistory()"></td>
       <td class="editable"><input class="signature-locked" value="${escapeAttr(m.responsible||'')}" data-r="${r}" data-f="responsible" readonly></td>
     </tr>`;
   }).join('');
   syncLotStatusUI(rec);
   applyPermissions();
   updateBalanceUI();
+  compactMovementRows();
+  renderMovementHistory();
+  applyRecordLock(rec);
+  const ident=document.getElementById('operatorIdentity');
+  if(ident)ident.textContent=currentUser?signatureLabel():roleLabel(activeOperationalRole);
+  setSyncState('synced');
   dirty=false;
 }
 function stampResponsible(r){
@@ -1163,7 +1305,92 @@ function dateInputValue(v){
   const p=s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
   return p?`${p[3]}-${String(p[2]).padStart(2,'0')}-${String(p[1]).padStart(2,'0')}`:'';
 }
-function markDirty(){dirty=true}
+function setSyncState(state,message){
+  const el=document.getElementById('syncIndicator');
+  const dot=document.getElementById('mobileSyncDot');
+  const txt=document.getElementById('mobileSyncText');
+  const cfg={
+    synced:['synced','✓ SINCRONIZADO','#56cf6e','Sincronizado'],
+    saving:['saving','● SALVANDO...','#f0bd28','Salvando...'],
+    error:['error','! ERRO AO SALVAR','#ff7777','Erro']
+  }[state]||['synced','✓ SINCRONIZADO','#56cf6e','Sincronizado'];
+  if(el){el.className='sync-indicator '+cfg[0];el.textContent=message||cfg[1]}
+  if(dot)dot.style.color=cfg[2];
+  if(txt)txt.textContent=message||cfg[3];
+}
+function markDirty(){
+  dirty=true;
+  setSyncState('saving','ALTERAÇÕES NÃO SALVAS');
+}
+function showNextMovementRow(){
+  const rows=[...document.querySelectorAll('#movementRows tr.mov')];
+  const hidden=rows.find(r=>r.style.display==='none');
+  if(hidden){
+    hidden.style.display='';
+    hidden.querySelector('input:not([readonly])')?.focus();
+  }
+  updateAddMovementButton();
+}
+function updateAddMovementButton(){
+  const rows=[...document.querySelectorAll('#movementRows tr.mov')];
+  const btn=document.getElementById('addMovementBtn');
+  if(btn)btn.style.display=rows.some(r=>r.style.display==='none')?'inline-flex':'none';
+}
+function compactMovementRows(){
+  const rows=[...document.querySelectorAll('#movementRows tr.mov')];
+  let lastFilled=-1;
+  rows.forEach((r,i)=>{
+    const vals=[...r.querySelectorAll('input')].map(x=>x.value).join('').trim();
+    if(vals)lastFilled=i;
+  });
+  const visibleThrough=Math.min(rows.length-1,lastFilled+1);
+  rows.forEach((r,i)=>r.style.display=i<=visibleThrough?'':'none');
+  updateAddMovementButton();
+}
+function renderMovementHistory(){
+  const box=document.getElementById('movementHistory');
+  const count=document.getElementById('historyCount');
+  if(!box)return;
+  const rows=[...document.querySelectorAll('#movementRows tr.mov')].map(tr=>({
+    date:tr.querySelector('[data-f="date"]')?.value||'',
+    sheetQty:tr.querySelector('[data-f="sheetQty"]')?.value||'',
+    responsible:tr.querySelector('[data-f="responsible"]')?.value||''
+  })).filter(m=>m.date||m.sheetQty);
+  if(count)count.textContent=`${rows.length} ${rows.length===1?'registro':'registros'}`;
+  if(!rows.length){
+    box.innerHTML='<div class="empty-history">Nenhum apontamento realizado.</div>';
+    return;
+  }
+  box.innerHTML=rows.map(m=>`<div class="history-item">
+    <div><span class="h-label">DATA</span>${escapeHtml(m.date?formatDateDisplay(m.date):'—')}</div>
+    <div><span class="h-label">CHAPAS</span>${escapeHtml(m.sheetQty||'0')}</div>
+    <div><span class="h-label">RESPONSÁVEL</span>${escapeHtml(m.responsible||'—')}</div>
+  </div>`).join('');
+}
+function requestFinalize(){
+  if(currentIndex<0)return;
+  const rec=getRoleRecord(lots[currentIndex]);
+  if(normalizeStatus(rec.status)==='done')return;
+  const lote=lots[currentIndex]?.lot||'';
+  if(confirm(`Finalizar o lote ${lote} para ${roleLabel(activeOperationalRole)}?\\n\\nApós concluir, o operador não poderá mais alterar a ficha.`)){
+    toggleFinalizeCurrent(true);
+  }
+}
+function applyRecordLock(rec){
+  const done=normalizeStatus(rec.status)==='done';
+  const locked=done&&!isAdmin();
+  const wrap=document.querySelector('.sheet-wrap');
+  if(wrap)wrap.classList.toggle('locked-record',locked);
+  document.querySelectorAll('#movementRows input,#vConclusion').forEach(el=>{
+    if(locked)el.setAttribute('disabled','disabled');
+    else el.removeAttribute('disabled');
+  });
+  const add=document.getElementById('addMovementBtn');
+  if(add)add.style.display=locked?'none':add.style.display;
+  const mobileFinal=document.getElementById('mobileFinalizeBtn');
+  if(mobileFinal)mobileFinal.style.display=done?'none':'inline-flex';
+}
+
 function collectRecord(){
   const x=lots[currentIndex];
   if(isAdmin()){
@@ -1176,7 +1403,6 @@ function collectRecord(){
   rec.conclusion=document.getElementById('vConclusion').value;
   rec.movements=[...document.querySelectorAll('#movementRows tr')].map(tr=>({
     date:tr.querySelector('[data-f="date"]').value,
-    package:tr.querySelector('[data-f="package"]').value,
     sheetQty:tr.querySelector('[data-f="sheetQty"]').value,
     responsible:tr.querySelector('[data-f="responsible"]').value
   }));
@@ -1195,19 +1421,24 @@ function persistRoleRecord(x,rec){
   persistMap(map);
   broadcastUpdate();
   if(onlineMode&&supabaseClient){
+    setSyncState('saving');
     pushRoleRecordToSupabase(x,activeOperationalRole,rec)
-      .then(()=>pullFromSupabase())
-      .catch(e=>showMsg('Erro ao salvar no banco',escapeHtml(e.message||String(e))));
+      .then(()=>{setSyncState('synced');return pullFromSupabase()})
+      .catch(e=>{setSyncState('error');showMsg('Erro ao salvar no banco',escapeHtml(e.message||String(e)))});
+  }else{
+    setSyncState('synced');
   }
 }
 function saveCurrent(show=true){
   if(currentIndex<0)return;
+  setSyncState('saving');
   const x=lots[currentIndex];
   const rec=collectRecord();
   persistRoleRecord(x,rec);
   dirty=false;
-  syncLotStatusUI(rec);updateBalanceUI();renderLots();updateKpis();renderLiveActivity();
-  if(show)showMsg('Ficha salva',`Apontamentos salvos somente na ficha de <b>${roleLabel(activeOperationalRole)}</b>.`);
+  syncLotStatusUI(rec);updateBalanceUI();renderMovementHistory();renderLots();updateKpis();renderLiveActivity();
+  if(!onlineMode)setSyncState('synced');
+  if(show)showMsg('Apontamento salvo',`Ficha de <b>${roleLabel(activeOperationalRole)}</b> atualizada com sucesso.`);
 }
 function toggleFinalizeCurrent(doneState){
   if(currentIndex<0)return;
@@ -1218,7 +1449,7 @@ function toggleFinalizeCurrent(doneState){
   rec.updatedAt=new Date().toISOString();
   persistRoleRecord(x,rec);
   dirty=false;
-  syncLotStatusUI(rec);updateBalanceUI();renderLots();updateKpis();renderLiveActivity();
+  syncLotStatusUI(rec);updateBalanceUI();renderMovementHistory();applyRecordLock(rec);renderLots();updateKpis();renderLiveActivity();
   showMsg(doneState?'Lote finalizado':'Lote reaberto',`A ficha de <b>${roleLabel(activeOperationalRole)}</b> foi ${doneState?'concluída':'reaberta'}.`);
 }
 function syncLotStatusUI(rec){
@@ -1229,22 +1460,20 @@ function syncLotStatusUI(rec){
   document.getElementById('statusText').textContent=done?'Concluído':'Em aberto';
   document.getElementById('completedAtText').textContent=rec.completedAt?formatDateTimeDisplay(rec.completedAt):'—';
   document.getElementById('finalizeBtn').style.display=done?'none':'inline-flex';
-  document.getElementById('reopenBtn').style.display=done?'inline-flex':'none';
+  document.getElementById('reopenBtn').style.display=(done&&isAdmin())?'inline-flex':'none';
+  const ss=document.getElementById('sumStatus');if(ss)ss.textContent=done?'CONCLUÍDO':'EM ABERTO';
+  const mf=document.getElementById('mobileFinalizeBtn');if(mf)mf.style.display=done?'none':'inline-flex';
 }
 function calculateUsedSheets(){
-  const x=lots[currentIndex];
-  const packSize=getPackageSize(x.product||x.sheet)||0;
-  const packages=[...document.querySelectorAll('#movementRows [data-f="package"]')].reduce((s,e)=>s+(Number(String(e.value||0).replace(',','.'))||0),0);
-  const sheets=[...document.querySelectorAll('#movementRows [data-f="sheetQty"]')].reduce((s,e)=>s+(Number(String(e.value||0).replace(',','.'))||0),0);
-  return packages*packSize+sheets;
+  return [...document.querySelectorAll('#movementRows [data-f="sheetQty"]')]
+    .reduce((s,e)=>s+(Number(String(e.value||0).replace(',','.'))||0),0);
 }
 function updateBalanceUI(){
   if(currentIndex<0)return;
   const x=lots[currentIndex];
-  const packageSize=getPackageSize(x.product||x.sheet);
   const ruleEl=document.getElementById('ruleText');
   const balEl=document.getElementById('balanceText');
-  ruleEl.textContent=packageSize?`1 pacote = ${packageSize} chapas • + chapas avulsas`:'Regra não cadastrada • chapas avulsas serão abatidas';
+  ruleEl.textContent='Quantidade de chapas';
   const total=Number(String(document.getElementById('vInitialQty').value||0).replace(',','.'))||0;
   const used=calculateUsedSheets();
   const balance=total-used;
@@ -1253,6 +1482,11 @@ function updateBalanceUI(){
   qtyField.style.color=balance<0?'#b00020':balance===0?'#8a6500':'#111';
   balEl.textContent=`${formatNumber(balance)} chapas restantes (${formatNumber(used)} consumidas)`;
   balEl.className='big '+(balance>0?'balance-positive':balance===0?'balance-zero':'balance-negative');
+  const si=document.getElementById('sumInitial'); if(si)si.textContent=formatNumber(total);
+  const su=document.getElementById('sumUsed'); if(su)su.textContent=formatNumber(used);
+  const sb=document.getElementById('sumBalance'); if(sb){sb.textContent=formatNumber(balance);sb.style.color=balance<0?'#ff7777':balance===0?'#ffd449':'#f7d978'}
+  const ss=document.getElementById('sumStatus'); if(ss)ss.textContent=balance<0?'SALDO NEGATIVO':document.getElementById('statusText')?.textContent?.toUpperCase()||'EM ABERTO';
+  renderMovementHistory();
 }
 function showOverview(){
   if(dirty)saveCurrent(false);
@@ -1268,7 +1502,8 @@ function renderLiveActivity(){
   lots.forEach(x=>{
     ['forklift','cut'].forEach(role=>{
       const rec=getRoleRecord(x,role);
-      if(rec.updatedAt&&rec.lastUser){
+      const done=normalizeStatus(rec.status)==='done';
+      if(!done && rec.updatedAt && rec.lastUser){
         const c=calcRecord(x,rec);
         rows.push({x,role,rec,c});
       }
@@ -1276,20 +1511,17 @@ function renderLiveActivity(){
   });
   rows.sort((a,b)=>new Date(b.rec.updatedAt)-new Date(a.rec.updatedAt));
   if(!rows.length){
-    box.innerHTML='<div class="empty" style="padding:18px">Nenhum apontamento registrado ainda.</div>';
+    box.innerHTML='<div class="empty" style="padding:18px">Nenhum lote em andamento no momento.</div>';
     return;
   }
-  box.innerHTML=rows.slice(0,12).map(({x,role,rec,c})=>{
-    const done=normalizeStatus(rec.status)==='done';
-    return `<div class="live-item">
-      <div>
-        <div class="who">${escapeHtml(rec.lastUser)}</div>
-        <div class="what">Lote ${escapeHtml(x.lot||x.sheet)} • ${escapeHtml(roleLabel(role))} • ${formatNumber(c.used)} chapas apontadas</div>
-        <span class="${done?'live-completed':'live-open'}">${done?'✓ CONCLUÍDO':'EM ANDAMENTO'}</span>
-      </div>
-      <div class="time">${escapeHtml(formatDateTimeDisplay(done&&rec.completedAt?rec.completedAt:rec.updatedAt))}</div>
-    </div>`;
-  }).join('');
+  box.innerHTML=rows.slice(0,12).map(({x,role,rec,c})=>`<div class="live-item">
+    <div>
+      <div class="who">${escapeHtml(rec.lastUser)}</div>
+      <div class="what">Lote ${escapeHtml(x.lot||x.sheet)} • ${escapeHtml(roleLabel(role))} • ${formatNumber(c.used)} chapas apontadas</div>
+      <span class="live-open">EM ANDAMENTO</span>
+    </div>
+    <div class="time">${escapeHtml(formatDateTimeDisplay(rec.updatedAt))}</div>
+  </div>`).join('');
 }
 
 
