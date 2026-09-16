@@ -576,6 +576,7 @@ let linkedHandles=[];
 let supabaseClient=null;
 let onlineMode=false;
 let pullingRemote=false;
+let importInProgress=false;
 const SB_CFG_KEY='nesher_supabase_config_v1';
 const DEFAULT_SUPABASE_CONFIG={url:'https://ltsescnvycxkxokyauen.supabase.co',key:'sb_publishable_hSU6_jgA-C3DjNFV_JMNOg_H2N081JR'};
 
@@ -759,7 +760,7 @@ async function remoteLogout(){
   }
 }
 async function pullFromSupabase(){
-  if(!onlineMode || !supabaseClient || pullingRemote || shouldDeferLiveSync())return;
+  if(!onlineMode || !supabaseClient || pullingRemote || importInProgress || shouldDeferLiveSync())return;
   pullingRemote=true;
   try{
     const [{data:lotRows,error:le},{data:recordRows,error:re},{data:movementRows,error:me}] = await Promise.all([
@@ -1147,54 +1148,175 @@ setInterval(()=>{
   if(currentUser && !shouldDeferLiveSync()) syncFromStorage();
 },2500);
 
+function normCell(v){
+  return String(v??'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
+}
+function firstNonEmptyToRight(ws,row,startCol,maxCols=8){
+  for(let c=startCol+1;c<=Math.min(startCol+maxCols,20);c++){
+    const cell=ws[XLSX.utils.encode_cell({r:row-1,c:c-1})];
+    if(cell && cell.v!==undefined && String(cell.v).trim()!=='') return cell.v;
+  }
+  return '';
+}
+function findLabelCell(ws,labels,maxRows=25,maxCols=12){
+  const wanted=labels.map(normCell);
+  for(let r=1;r<=maxRows;r++){
+    for(let c=1;c<=maxCols;c++){
+      const cell=ws[XLSX.utils.encode_cell({r:r-1,c:c-1})];
+      if(!cell || cell.v===undefined)continue;
+      const t=normCell(cell.v);
+      if(wanted.some(w=>t===w || t.includes(w))) return {row:r,col:c,value:cell.v};
+    }
+  }
+  return null;
+}
+function valueBelowOrRight(ws,pos){
+  if(!pos)return '';
+  const candidates=[
+    {r:pos.row,c:pos.col+1},{r:pos.row,c:pos.col+2},{r:pos.row+1,c:pos.col},
+    {r:pos.row+1,c:pos.col+1},{r:pos.row+1,c:pos.col+2}
+  ];
+  for(const p of candidates){
+    const cell=ws[XLSX.utils.encode_cell({r:p.r-1,c:p.c-1})];
+    if(cell && cell.v!==undefined && String(cell.v).trim()!=='') return cell.v;
+  }
+  return '';
+}
 function parseWorkbook(wb){
   const out=[];
   wb.SheetNames.forEach(name=>{
     const ws=wb.Sheets[name];
     const g=a=>ws[a]&&ws[a].v!==undefined?ws[a].v:'';
-    const item={
+
+    const lotPos=findLabelCell(ws,['LOTE']);
+    const prodPos=findLabelCell(ws,['PRODUTO']);
+    const descPos=findLabelCell(ws,['DESCRICAO','DESCRIÇÃO']);
+    const qtyPos=findLabelCell(ws,['QUANTIDADE DE CHAPAS','QUANTIDADE CHAPAS']);
+
+    const lot=(lotPos?valueBelowOrRight(ws,lotPos):'') || g('A2') || '';
+    const product=(prodPos?valueBelowOrRight(ws,prodPos):'') || g('B2') || name || '';
+    const description=(descPos?valueBelowOrRight(ws,descPos):'') || g('C2') || '';
+    let qty=(qtyPos?valueBelowOrRight(ws,qtyPos):'') || g('B4') || g('C4') || g('D4') || '';
+
+    // Uma aba-modelo vazia não deve virar lote no sistema.
+    if(!String(lot||'').trim()) return;
+
+    out.push({
       sheet:name,
-      lot:g('A2')||'',
-      product:g('B2')||name||'',
-      description:g('C2')||'',
-      qty:g('B4')||g('C4')||g('D4')||''
-    };
-    if(item.lot||item.product||item.description) out.push(item);
+      lot:String(lot).trim(),
+      product:String(product||name).trim(),
+      description:String(description||'').trim(),
+      qty:qty
+    });
   });
   return out;
 }
+
 async function readFile(file,silent=false){
-  if(!isAdmin()){showMsg('Acesso restrito','Somente o administrador pode importar planilhas.');return 0}
-  if(!window.XLSX){showMsg('Biblioteca Excel indisponível','Abra este arquivo com acesso à internet para carregar o leitor de Excel.');return 0}
-  const data=await file.arrayBuffer();
-  const wb=XLSX.read(data,{type:'array',cellDates:true});
-  const incoming=parseWorkbook(wb).map(x=>({...x,sourceFile:file.name}));
-  if(!incoming.length){
-    if(!silent)showMsg('Nenhuma ficha encontrada',`Não encontrei lotes no arquivo <b>${escapeHtml(file.name)}</b>.`);
-    return 0;
+  if(!isAdmin()){
+    showMsg('Acesso restrito','Somente o administrador pode importar planilhas.');
+    return {count:0,error:'Acesso restrito'};
   }
-  const merged=[...lots.filter(x=>x.sourceFile!=='Exemplo' || localStorage.getItem(MASTER_KEY))];
-  incoming.forEach(item=>{
-    const idx=merged.findIndex(x=>lotKey(x)===lotKey(item));
-    if(idx>=0){
-      merged[idx]={...merged[idx],...item,qty:item.qty!==''?item.qty:merged[idx].qty};
-    }else merged.push(item);
-  });
-  lots=merged;
-  persistMasterLots();
-  if(onlineMode&&supabaseClient){try{await Promise.all(lots.map(x=>pushLotToSupabase(x)))}catch(e){showMsg('Erro no banco',escapeHtml(e.message||String(e)));}}
-  broadcastUpdate();
-  renderLots();updateKpis();renderLiveActivity();
-  return incoming.length;
+  if(!window.XLSX){
+    showMsg('Biblioteca Excel indisponível','O leitor de Excel não carregou. Atualize a página com internet e tente novamente.');
+    return {count:0,error:'Biblioteca Excel indisponível'};
+  }
+
+  try{
+    const data=await file.arrayBuffer();
+    const wb=XLSX.read(data,{type:'array',cellDates:true});
+    const incoming=parseWorkbook(wb).map(x=>({...x,sourceFile:file.name}));
+
+    if(!incoming.length){
+      const msg=`O arquivo ${escapeHtml(file.name)} foi lido, mas nenhuma aba com <b>LOTE preenchido</b> foi encontrada.`;
+      if(!silent)showMsg('Nenhum lote encontrado',msg);
+      return {count:0,error:'Nenhum lote com LOTE preenchido'};
+    }
+
+    incoming.forEach(item=>{
+      const idx=lots.findIndex(x=>lotKey(x)===lotKey(item));
+      if(idx>=0){
+        lots[idx]={...lots[idx],...item,qty:item.qty!==''?item.qty:lots[idx].qty};
+      }else{
+        lots.push(item);
+      }
+    });
+
+    // Salva localmente primeiro para a tela refletir imediatamente.
+    localStorage.setItem(MASTER_KEY,JSON.stringify(lots));
+    renderLots();
+    updateKpis();
+
+    // Depois grava no banco central e só então relê os dados.
+    if(onlineMode&&supabaseClient){
+      for(const item of incoming){
+        await pushLotToSupabase(item);
+        const idx=lots.findIndex(x=>lotKey(x)===lotKey(item));
+        if(idx>=0) lots[idx].dbId=item.dbId;
+      }
+      localStorage.setItem(MASTER_KEY,JSON.stringify(lots));
+    }
+
+    broadcastUpdate();
+    return {count:incoming.length,error:null};
+  }catch(e){
+    console.error('Importação Excel:',e);
+    if(!silent)showMsg('Erro ao importar planilha',escapeHtml(e.message||String(e)));
+    return {count:0,error:e.message||String(e)};
+  }
 }
+
 document.getElementById('fileInput').addEventListener('change',async e=>{
   const files=[...(e.target.files||[])];
   if(!files.length)return;
+
+  importInProgress=true;
   let total=0;
-  for(const f of files) total+=await readFile(f,true);
-  e.target.value='';
-  showOverview();
-  showMsg('Planilhas adicionadas',`${files.length} arquivo(s) processado(s), com <b>${total}</b> ficha(s) lida(s).<br>As planilhas anteriores foram mantidas.`);
+  const errors=[];
+  try{
+    for(const f of files){
+      const result=await readFile(f,true);
+      total+=result.count||0;
+      if(result.error)errors.push(`${f.name}: ${result.error}`);
+    }
+
+    // Garante que o usuário veja os lotes importados, mesmo se havia busca/filtro ativo.
+    const search=document.getElementById('search');
+    if(search)search.value='';
+    const month=document.getElementById('doneMonth');
+    const year=document.getElementById('doneYear');
+    if(month)month.value='';
+    if(year)year.value='';
+    currentView='all';
+
+    if(onlineMode&&supabaseClient){
+      // Libera o pull somente após terminar toda a gravação.
+      importInProgress=false;
+      await pullFromSupabase();
+    }else{
+      renderLots();updateKpis();renderLiveActivity();
+      importInProgress=false;
+    }
+
+    setView('all');
+
+    if(total>0){
+      showMsg(
+        'Importação concluída',
+        `<b>${total} lote(s)</b> importado(s) de ${files.length} arquivo(s).<br><br>`+
+        (errors.length?`Alguns arquivos tiveram aviso:<br>${errors.map(escapeHtml).join('<br>')}`:'Os lotes já estão disponíveis em <b>Todos</b>.')
+      );
+    }else{
+      showMsg(
+        'Nenhum lote importado',
+        `A planilha foi aberta, mas não encontrei lote válido para adicionar.<br><br>`+
+        `${errors.map(escapeHtml).join('<br>')||'Verifique se o campo LOTE está preenchido nas abas que deseja importar.'}`
+      );
+    }
+  }finally{
+    importInProgress=false;
+    e.target.value='';
+  }
 });
 
 async function linkSpreadsheet(){
@@ -1213,7 +1335,7 @@ async function linkSpreadsheet(){
     });
     linkedHandles=handles;
     let total=0;
-    for(const h of linkedHandles) total+=await readFile(await h.getFile(),true);
+    for(const h of linkedHandles){const r=await readFile(await h.getFile(),true);total+=r.count||0;}
     showMsg('Planilhas vinculadas',`${linkedHandles.length} arquivo(s) vinculado(s). Foram lidas <b>${total}</b> ficha(s), sem apagar as anteriores.`);
   }catch(e){if(e.name!=='AbortError')showMsg('Não foi possível vincular',escapeHtml(e.message||String(e)))}
 }
@@ -1225,7 +1347,7 @@ async function refreshLinked(){
   }
   let total=0;
   for(const h of linkedHandles){
-    try{total+=await readFile(await h.getFile(),true)}catch(e){}
+    try{const r=await readFile(await h.getFile(),true);total+=r.count||0}catch(e){}
   }
   showMsg('Planilhas atualizadas',`${linkedHandles.length} arquivo(s) relido(s). As demais planilhas carregadas foram mantidas.`);
 }
