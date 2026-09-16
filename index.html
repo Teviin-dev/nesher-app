@@ -335,6 +335,63 @@ body.mobile-mode .mobile-action-bar .btn{padding:11px 8px;font-size:11px}
 .pwa-installed{display:inline-flex;align-items:center;gap:6px;border:1px solid #2e6d3a;background:#112317;color:#b9f5c3;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:800}
 body.mobile-mode #installPwaTopBtn{padding:7px 9px;font-size:10px}
 
+
+/* V22 - CORREÇÃO DO PREENCHIMENTO EM CELULAR/TABLET */
+body.mobile-mode .sheet-wrap{overflow:visible;padding:8px}
+body.mobile-mode .sheet{width:100%!important;min-width:0!important;display:block;background:transparent}
+body.mobile-mode .sheet colgroup{display:none!important}
+body.mobile-mode .sheet tbody{display:block;width:100%}
+body.mobile-mode #movementRows{display:block!important;width:100%!important}
+body.mobile-mode #movementRows .mov{
+  display:grid!important;grid-template-columns:1fr 1fr!important;width:100%!important;
+  box-sizing:border-box;gap:10px;padding:12px;margin:0 0 10px;border-radius:12px;
+  background:#f4f4f4;border:1px solid #d7d7d7
+}
+body.mobile-mode #movementRows .mov td{
+  display:block!important;width:100%!important;box-sizing:border-box;height:auto!important;
+  padding:8px!important;border:1px solid #dedede!important;border-radius:8px;background:#fff!important
+}
+body.mobile-mode #movementRows .mov td:nth-child(3){grid-column:1/-1}
+body.mobile-mode #movementRows .mov input{
+  width:100%!important;box-sizing:border-box;height:42px;padding:8px 10px!important;
+  border:1px solid #cfcfcf!important;border-radius:7px;background:#fff!important;
+  color:#111!important;font-size:16px!important;text-align:left!important
+}
+body.mobile-mode #movementRows .mov .signature-locked{background:#ededed!important;font-weight:700!important}
+body.mobile-mode #movementRows .mov .date-icon-only{
+  color:#111!important;width:100%!important;max-width:none!important;text-align:left!important
+}
+body.mobile-mode #movementRows .mov td::before{
+  display:block;font-size:10px;font-weight:900;color:#555;letter-spacing:.5px;margin-bottom:5px
+}
+body.mobile-mode #movementRows .mov td:nth-child(1)::before{content:'DATA'}
+body.mobile-mode #movementRows .mov td:nth-child(2)::before{content:'QUANTIDADE DE CHAPAS'}
+body.mobile-mode #movementRows .mov td:nth-child(3)::before{content:'RESPONSÁVEL'}
+body.mobile-mode .add-row-cell{display:block!important;width:100%!important;box-sizing:border-box}
+body.mobile-mode .add-movement{width:100%!important;min-width:0!important;justify-content:center}
+body.mobile-mode .sheet tr:has(.qty-label){display:grid!important;grid-template-columns:1fr 1fr!important;width:100%!important}
+body.mobile-mode .sheet tr:has(.qty-label) td{display:block!important;width:100%!important;box-sizing:border-box}
+body.mobile-mode .sheet tr:has(.black),body.mobile-mode .sheet tr:has(.value){
+  display:grid!important;grid-template-columns:1fr 1fr 1.4fr!important;width:100%!important
+}
+body.mobile-mode .sheet tr:has(.black) th,body.mobile-mode .sheet tr:has(.value) td{
+  display:block!important;width:100%!important;box-sizing:border-box
+}
+body.mobile-mode .sheet tr:has(.conclusion-label){display:grid!important;grid-template-columns:1fr!important;width:100%!important}
+body.mobile-mode .sheet .conclusion-label,body.mobile-mode .sheet .conclusion{
+  display:block!important;width:100%!important;box-sizing:border-box
+}
+body.mobile-mode .sheet .conclusion-label{height:auto!important;padding:10px!important}
+body.mobile-mode .sheet .conclusion{height:auto!important;min-height:100px}
+body.mobile-mode .sheet .conclusion textarea{min-height:90px;font-size:16px!important}
+@media(max-width:600px){
+  body.mobile-mode #movementRows .mov{grid-template-columns:1fr!important}
+  body.mobile-mode #movementRows .mov td{grid-column:1!important}
+  body.mobile-mode .sheet tr:has(.qty-label),
+  body.mobile-mode .sheet tr:has(.black),
+  body.mobile-mode .sheet tr:has(.value){grid-template-columns:1fr!important}
+}
+
 @media print{body{background:white}.sidebar,.topbar,.grid-kpi,.toolbar,.sheet-toolbar,.note,.info-panel{display:none!important}.app{display:block}.main{padding:0}.workspace{display:block!important}.overview{display:none!important}.sheet-wrap{border:0;padding:0;background:white}.sheet{box-shadow:none;width:100%;min-width:0}.sheet th,.sheet td{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style>
 
@@ -1327,7 +1384,8 @@ function showNextMovementRow(){
   const hidden=rows.find(r=>r.style.display==='none');
   if(hidden){
     hidden.style.display='';
-    hidden.querySelector('input:not([readonly])')?.focus();
+    hidden.scrollIntoView({behavior:'smooth',block:'center'});
+    setTimeout(()=>hidden.querySelector('[data-f="date"]')?.focus(),250);
   }
   updateAddMovementButton();
 }
