@@ -1151,10 +1151,24 @@ setInterval(()=>{
 function normCell(v){
   return String(v??'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
 }
+function isMeaningful(v){
+  return v!==undefined && v!==null && String(v).trim()!=='';
+}
+function isHeaderLike(v){
+  const t=normCell(v);
+  return ['LOTE','PRODUTO','DESCRICAO','DESCRIÇÃO','QUANTIDADE DE CHAPAS','QUANTIDADE CHAPAS','DATA','ASS.RESPONSAVEL','ASS RESPONSAVEL'].includes(t);
+}
 function firstNonEmptyToRight(ws,row,startCol,maxCols=8){
   for(let c=startCol+1;c<=Math.min(startCol+maxCols,20);c++){
     const cell=ws[XLSX.utils.encode_cell({r:row-1,c:c-1})];
-    if(cell && cell.v!==undefined && String(cell.v).trim()!=='') return cell.v;
+    if(cell && isMeaningful(cell.v) && !isHeaderLike(cell.v)) return cell.v;
+  }
+  return '';
+}
+function firstNonEmptyBelow(ws,startRow,col,maxRows=8){
+  for(let r=startRow+1;r<=Math.min(startRow+maxRows,40);r++){
+    const cell=ws[XLSX.utils.encode_cell({r:r-1,c:col-1})];
+    if(cell && isMeaningful(cell.v) && !isHeaderLike(cell.v)) return cell.v;
   }
   return '';
 }
@@ -1163,24 +1177,28 @@ function findLabelCell(ws,labels,maxRows=25,maxCols=12){
   for(let r=1;r<=maxRows;r++){
     for(let c=1;c<=maxCols;c++){
       const cell=ws[XLSX.utils.encode_cell({r:r-1,c:c-1})];
-      if(!cell || cell.v===undefined)continue;
+      if(!cell || !isMeaningful(cell.v))continue;
       const t=normCell(cell.v);
       if(wanted.some(w=>t===w || t.includes(w))) return {row:r,col:c,value:cell.v};
     }
   }
   return null;
 }
-function valueBelowOrRight(ws,pos){
+function valueNear(ws,pos){
   if(!pos)return '';
-  const candidates=[
-    {r:pos.row,c:pos.col+1},{r:pos.row,c:pos.col+2},{r:pos.row+1,c:pos.col},
-    {r:pos.row+1,c:pos.col+1},{r:pos.row+1,c:pos.col+2}
-  ];
-  for(const p of candidates){
-    const cell=ws[XLSX.utils.encode_cell({r:p.r-1,c:p.c-1})];
-    if(cell && cell.v!==undefined && String(cell.v).trim()!=='') return cell.v;
-  }
+  const right=firstNonEmptyToRight(ws,pos.row,pos.col,8);
+  if(right!=='') return right;
+  const below=firstNonEmptyBelow(ws,pos.row,pos.col,8);
+  if(below!=='') return below;
+  const diag=ws[XLSX.utils.encode_cell({r:pos.row,c:pos.col})];
+  if(diag && isMeaningful(diag.v) && !isHeaderLike(diag.v)) return diag.v;
   return '';
+}
+function validLotValue(v){
+  const t=String(v||'').trim();
+  if(!t) return false;
+  if(isHeaderLike(t)) return false;
+  return true;
 }
 function parseWorkbook(wb){
   const out=[];
@@ -1188,25 +1206,55 @@ function parseWorkbook(wb){
     const ws=wb.Sheets[name];
     const g=a=>ws[a]&&ws[a].v!==undefined?ws[a].v:'';
 
-    const lotPos=findLabelCell(ws,['LOTE']);
-    const prodPos=findLabelCell(ws,['PRODUTO']);
-    const descPos=findLabelCell(ws,['DESCRICAO','DESCRIÇÃO']);
-    const qtyPos=findLabelCell(ws,['QUANTIDADE DE CHAPAS','QUANTIDADE CHAPAS']);
+    // 1) Primeiro tenta o layout padrão NESHER (mais confiável)
+    const a1=normCell(g('A1'));
+    const b1=normCell(g('B1'));
+    const c1=normCell(g('C1'));
+    let lot='', product='', description='', qty='';
 
-    const lot=(lotPos?valueBelowOrRight(ws,lotPos):'') || g('A2') || '';
-    const product=(prodPos?valueBelowOrRight(ws,prodPos):'') || g('B2') || name || '';
-    const description=(descPos?valueBelowOrRight(ws,descPos):'') || g('C2') || '';
-    let qty=(qtyPos?valueBelowOrRight(ws,qtyPos):'') || g('B4') || g('C4') || g('D4') || '';
+    if(a1.includes('LOTE') && b1.includes('PRODUTO') && c1.includes('DESCRICAO')){
+      lot = g('A2') || '';
+      product = g('B2') || name || '';
+      description = g('C2') || '';
+      qty = g('B4') || g('C4') || g('B5') || g('C5') || '';
+    }
 
-    // Uma aba-modelo vazia não deve virar lote no sistema.
-    if(!String(lot||'').trim()) return;
+    // 2) Se o layout acima não resolveu, usa busca flexível por rótulos.
+    if(!validLotValue(lot) || !isMeaningful(product) || !isMeaningful(description)){
+      const lotPos=findLabelCell(ws,['LOTE']);
+      const prodPos=findLabelCell(ws,['PRODUTO']);
+      const descPos=findLabelCell(ws,['DESCRICAO','DESCRIÇÃO']);
+      const qtyPos=findLabelCell(ws,['QUANTIDADE DE CHAPAS','QUANTIDADE CHAPAS']);
+
+      lot = validLotValue(lot) ? lot : (valueNear(ws,lotPos) || g('A2') || lot || '');
+      product = isMeaningful(product) ? product : (valueNear(ws,prodPos) || g('B2') || name || '');
+      description = isMeaningful(description) ? description : (valueNear(ws,descPos) || g('C2') || '');
+      qty = isMeaningful(qty) ? qty : (valueNear(ws,qtyPos) || g('B4') || g('C4') || g('D4') || '');
+    }
+
+    lot = String(lot||'').trim();
+    product = String(product||'').trim();
+    description = String(description||'').trim();
+
+    // 3) Proteções contra capturar cabeçalhos por engano.
+    if(isHeaderLike(lot) || lot==='') {
+      // se o nome da aba se parecer com lote, usa como fallback
+      if(/^N?\d{5,}$/i.test(String(name).trim())) lot=String(name).trim();
+    }
+    if(isHeaderLike(product) || product===''){
+      if(!isHeaderLike(name)) product=String(name||'').trim();
+    }
+    if(isHeaderLike(description)) description='';
+
+    // Aba-modelo vazia não deve virar lote.
+    if(!validLotValue(lot)) return;
 
     out.push({
       sheet:name,
-      lot:String(lot).trim(),
-      product:String(product||name).trim(),
-      description:String(description||'').trim(),
-      qty:qty
+      lot,
+      product,
+      description,
+      qty
     });
   });
   return out;
@@ -1225,7 +1273,12 @@ async function readFile(file,silent=false){
   try{
     const data=await file.arrayBuffer();
     const wb=XLSX.read(data,{type:'array',cellDates:true});
-    const incoming=parseWorkbook(wb).map(x=>({...x,sourceFile:file.name}));
+    const fileBase=String(file.name||'').replace(/\.[^.]+$/,'').trim();
+    const incoming=parseWorkbook(wb).map(x=>({
+      ...x,
+      lot:(x.lot && !isHeaderLike(x.lot) ? x.lot : (/^N?\d{5,}$/i.test(fileBase)?fileBase:(x.lot||''))),
+      sourceFile:file.name
+    }));
 
     if(!incoming.length){
       const msg=`O arquivo ${escapeHtml(file.name)} foi lido, mas nenhuma aba com <b>LOTE preenchido</b> foi encontrada.`;
