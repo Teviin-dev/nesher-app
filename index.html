@@ -392,6 +392,59 @@ body.mobile-mode .sheet .conclusion textarea{min-height:90px;font-size:16px!impo
   body.mobile-mode .sheet tr:has(.value){grid-template-columns:1fr!important}
 }
 
+
+
+/* V27 - ADMINISTRAÇÃO DE USUÁRIOS */
+.users-panel{display:none}
+.users-panel.active{display:block}
+.users-layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(330px,.8fr);gap:14px}
+.users-card{background:#111214;border:1px solid #302a20;border-radius:14px;padding:14px}
+.user-role-tag{font-size:10px;border:1px solid #4a4026;border-radius:999px;padding:4px 7px;color:#e2cc83;white-space:nowrap}
+.user-login{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;color:#aaa;font-size:11px}
+@media(max-width:980px){.users-layout{grid-template-columns:1fr}}
+body.mobile-mode .users-layout{grid-template-columns:1fr}
+
+/* V26 - ADMINISTRAÇÃO DE REGRAS */
+.rules-panel{display:none}
+.rules-panel.active{display:block}
+.rules-layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,.8fr);gap:14px}
+.rules-card,.rule-editor{background:#111214;border:1px solid #302a20;border-radius:14px;padding:14px}
+.rules-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.rules-toolbar .search{max-width:520px}
+.rules-table-wrap{overflow:auto;border:1px solid #292820;border-radius:10px}
+.rules-table{width:100%;border-collapse:collapse;min-width:760px}
+.rules-table th{background:#08090a;color:#d7b84a;font-size:10px;letter-spacing:.7px;text-align:left;padding:10px;border-bottom:1px solid #343025}
+.rules-table td{padding:10px;border-bottom:1px solid #242424;font-size:12px;vertical-align:middle}
+.rules-table tr:hover td{background:#151617}
+.rules-code{font-size:14px;font-weight:900;color:var(--gold2)}
+.rule-type-tag{font-size:10px;border:1px solid #4a4026;border-radius:999px;padding:4px 7px;color:#e2cc83}
+.rule-state{font-size:10px;font-weight:900;border-radius:999px;padding:4px 7px;display:inline-flex}
+.rule-state.on{color:#b9f5c3;border:1px solid #2e6d3a;background:#112317}
+.rule-state.off{color:#aaa;border:1px solid #484848;background:#1b1b1b}
+.rule-actions{display:flex;gap:6px;white-space:nowrap}
+.rule-actions .btn{padding:6px 8px;font-size:10px}
+.rule-editor{position:sticky;top:14px;height:max-content}
+.rule-editor-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;color:var(--gold2)}
+.rule-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rule-form-grid label{font-size:10px;color:#a9a9a9;display:flex;flex-direction:column;gap:5px}
+.rule-form-grid input,.rule-form-grid select,.rule-form-grid textarea{
+  width:100%;box-sizing:border-box;background:#0c0d0e;color:#fff;border:1px solid #373327;border-radius:8px;padding:10px;outline:none;font:inherit
+}
+.rule-form-grid input:focus,.rule-form-grid select:focus,.rule-form-grid textarea:focus{border-color:var(--gold)}
+.rule-form-grid .full{grid-column:1/-1}
+.check-label{flex-direction:row!important;align-items:center!important;gap:7px!important;background:#0d0e0f;border:1px solid #2e2a21;border-radius:8px;padding:9px}
+.check-label input{width:auto!important}
+.rule-form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.rule-save-status{min-height:18px;margin-top:8px;font-size:11px;color:#9ef0aa}
+@media(max-width:980px){
+  .rules-layout{grid-template-columns:1fr}
+  .rule-editor{position:static}
+}
+body.mobile-mode .rules-layout{grid-template-columns:1fr}
+body.mobile-mode .rule-editor{position:static}
+body.mobile-mode .rule-form-grid{grid-template-columns:1fr}
+body.mobile-mode .rule-form-grid .full{grid-column:auto}
+
 @media print{body{background:white}.sidebar,.topbar,.grid-kpi,.toolbar,.sheet-toolbar,.note,.info-panel{display:none!important}.app{display:block}.main{padding:0}.workspace{display:block!important}.overview{display:none!important}.sheet-wrap{border:0;padding:0;background:white}.sheet{box-shadow:none;width:100%;min-width:0}.sheet th,.sheet td{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style>
 
@@ -443,6 +496,8 @@ body.mobile-mode .sheet .conclusion textarea{min-height:90px;font-size:16px!impo
       <button id="navDashboard" class="active" onclick="setView('all')">▦ Dashboard / Todos os lotes</button>
       <button id="navOpen" onclick="setView('open')">◷ Lotes em aberto</button>
       <button id="navDone" data-admin-only onclick="setView('done')">✓ Concluídos</button>
+      <button id="navRules" data-admin-only onclick="showRulesPanel()">⚙ Regras de Chapas</button>
+      <button id="navUsers" data-admin-only onclick="showUsersPanel()">👤 Usuários</button>
       <button id="installPwaBtn" style="display:none" onclick="installPWA()">⬇ Instalar aplicativo</button>
       <button data-admin-only onclick="document.getElementById('fileInput').click()">↥ Importar planilha</button>
       <button data-admin-only onclick="linkSpreadsheet()">⛓ Vincular planilha</button>
@@ -492,6 +547,158 @@ body.mobile-mode .sheet .conclusion textarea{min-height:90px;font-size:16px!impo
         <button data-admin-only class="btn" onclick="refreshLinked()">Atualizar dados</button>
       </div>
       <div id="lots" class="lots"></div>
+    </section>
+
+    <section id="usersPanel" class="users-panel">
+      <div class="topbar">
+        <div>
+          <h2>Usuários</h2>
+          <p>Cadastre novos acessos ao sistema. Somente administradores podem registrar usuários.</p>
+        </div>
+        <div class="actions">
+          <button class="btn" onclick="showOverview()">← Voltar</button>
+          <button class="btn primary" onclick="focusNewUser()">＋ Novo usuário</button>
+        </div>
+      </div>
+
+      <div class="users-layout">
+        <div class="users-card">
+          <div class="rules-toolbar">
+            <input id="userSearch" class="search" placeholder="Buscar usuário ou perfil..." oninput="renderUsers()">
+            <span id="usersCount" class="badge open">0 usuários</span>
+          </div>
+          <div class="rules-table-wrap">
+            <table class="rules-table">
+              <thead>
+                <tr>
+                  <th>NOME</th>
+                  <th>PERFIL</th>
+                  <th>LOGIN INTERNO</th>
+                </tr>
+              </thead>
+              <tbody id="usersBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="rule-editor" id="userEditor">
+          <div class="rule-editor-head">
+            <strong>Novo usuário</strong>
+            <span class="badge">ADMIN</span>
+          </div>
+          <div class="rule-form-grid">
+            <label class="full">Nome do usuário
+              <input id="newUserName" autocomplete="off" placeholder="Ex.: João">
+            </label>
+            <label class="full">Perfil
+              <select id="newUserRole" onchange="previewNewUserLogin()">
+                <option value="forklift">Operador de Empilhadeira</option>
+                <option value="cut">Operador do Corte</option>
+                <option value="admin">Administrador</option>
+              </select>
+            </label>
+            <label>Senha
+              <input id="newUserPassword" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres">
+            </label>
+            <label>Confirmar senha
+              <input id="newUserPassword2" type="password" autocomplete="new-password" placeholder="Repita a senha">
+            </label>
+            <label class="full">Login gerado
+              <input id="newUserLoginPreview" readonly>
+            </label>
+          </div>
+          <div class="note" style="margin-top:10px">
+            O operador continuará entrando com <b>Nome + Perfil + Senha</b>. O login interno é gerado automaticamente.
+          </div>
+          <div class="rule-form-actions">
+            <button class="btn" onclick="clearNewUserForm()">Limpar</button>
+            <button id="createUserBtn" class="btn primary" onclick="registerNewUser()">Registrar usuário</button>
+          </div>
+          <div id="userSaveStatus" class="rule-save-status"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="rulesPanel" class="rules-panel">
+      <div class="topbar">
+        <div>
+          <h2>Regras de Chapas</h2>
+          <p>Cadastre e altere as regras por código de produto. Somente administradores têm acesso.</p>
+        </div>
+        <div class="actions">
+          <button class="btn" onclick="showOverview()">← Voltar</button>
+          <button class="btn primary" onclick="newRule()">＋ Nova regra</button>
+        </div>
+      </div>
+
+      <div class="rules-layout">
+        <div class="rules-card">
+          <div class="rules-toolbar">
+            <input id="ruleSearch" class="search" placeholder="Buscar código ou descrição..." oninput="renderRules()">
+            <span id="rulesCount" class="badge open">0 regras</span>
+          </div>
+          <div class="rules-table-wrap">
+            <table class="rules-table">
+              <thead>
+                <tr>
+                  <th>CÓDIGO</th>
+                  <th>DESCRIÇÃO</th>
+                  <th>TIPO</th>
+                  <th>FATOR</th>
+                  <th>DECIMAL</th>
+                  <th>STATUS</th>
+                  <th>AÇÕES</th>
+                </tr>
+              </thead>
+              <tbody id="rulesBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="ruleEditor" class="rule-editor">
+          <div class="rule-editor-head">
+            <strong id="ruleEditorTitle">Nova regra</strong>
+            <span class="badge">ADMIN</span>
+          </div>
+
+          <div class="rule-form-grid">
+            <label>Código do produto
+              <input id="ruleCode" inputmode="numeric" placeholder="Ex.: 100198">
+            </label>
+            <label>Descrição
+              <input id="ruleDescription" placeholder="Ex.: MDF 2750X2100X25MM">
+            </label>
+            <label>Tipo da regra
+              <select id="ruleType" onchange="syncRuleForm()">
+                <option value="normal">Normal</option>
+                <option value="multiplier">Multiplicador</option>
+                <option value="fractional">Fracionada</option>
+                <option value="integer">Somente inteiro</option>
+              </select>
+            </label>
+            <label>Fator de consumo
+              <input id="ruleFactor" type="number" min="0.01" step="0.01" value="1">
+            </label>
+            <label class="check-label">
+              <input id="ruleAllowDecimal" type="checkbox" checked>
+              Permitir valor decimal
+            </label>
+            <label class="check-label">
+              <input id="ruleActive" type="checkbox" checked>
+              Regra ativa
+            </label>
+            <label class="full">Observação
+              <textarea id="ruleNotes" rows="3" placeholder="Observações internas sobre esta chapa"></textarea>
+            </label>
+          </div>
+
+          <div class="rule-form-actions">
+            <button class="btn" onclick="clearRuleForm()">Limpar</button>
+            <button class="btn primary" onclick="saveRule()">Salvar regra</button>
+          </div>
+          <div id="ruleSaveStatus" class="rule-save-status"></div>
+        </div>
+      </div>
     </section>
 
     <section id="workspace" class="workspace">
@@ -589,7 +796,16 @@ const USERS={
   forklift:{password:'1234',role:'forklift',profileName:'Operador de Empilhadeira'},
   cut:{password:'1234',role:'cut',profileName:'Operador do Corte'}
 };
-const PACKAGE_RULES={'100080':36,'100172':120};
+const DEFAULT_SHEET_RULES={
+  '100080':{description:'MDF 2750X2200X15MM',type:'normal',factor:1,allowDecimal:true},
+  '100172':{description:'MDF 2750X2200',type:'normal',factor:1,allowDecimal:true},
+  '100198':{description:'MDF 2750X2100X25MM',type:'normal',factor:1,allowDecimal:true},
+  '100115':{description:'MDF 2750X2200X25MM',type:'normal',factor:1,allowDecimal:true},
+  '100097':{description:'MDF 2750X1850X9MM',type:'normal',factor:1,allowDecimal:true},
+  '100210':{description:'SOBRAS MDF 9MM',type:'normal',factor:1,allowDecimal:true}
+};
+let SHEET_RULES={...DEFAULT_SHEET_RULES};
+let editingRuleCode='';
 const demo=[{
   sheet:'100080',lot:'N2607701',product:'100080',description:'MDF 2750X2200X15MM',
   qty:'',sourceFile:'Exemplo'
@@ -763,12 +979,30 @@ async function pullFromSupabase(){
   if(!onlineMode || !supabaseClient || pullingRemote || importInProgress || shouldDeferLiveSync())return;
   pullingRemote=true;
   try{
-    const [{data:lotRows,error:le},{data:recordRows,error:re},{data:movementRows,error:me}] = await Promise.all([
+    const [
+      {data:lotRows,error:le},
+      {data:recordRows,error:re},
+      {data:movementRows,error:me},
+      {data:ruleRows,error:rue}
+    ] = await Promise.all([
       supabaseClient.from('lots').select('*').order('imported_at',{ascending:true}),
       supabaseClient.from('operational_records').select('*'),
-      supabaseClient.from('movements').select('*').order('row_index',{ascending:true})
+      supabaseClient.from('movements').select('*').order('row_index',{ascending:true}),
+      supabaseClient.from('product_rules').select('*').order('product_code',{ascending:true})
     ]);
-    if(le)throw le;if(re)throw re;if(me)throw me;
+    if(le)throw le;if(re)throw re;if(me)throw me;if(rue)throw rue;
+
+    SHEET_RULES={...DEFAULT_SHEET_RULES};
+    for(const r of (ruleRows||[])){
+      SHEET_RULES[String(r.product_code).trim()]={
+        description:r.description||'',
+        type:r.rule_type||'normal',
+        factor:Number(r.factor??1)||1,
+        allowDecimal:r.allow_decimal!==false,
+        active:r.active!==false,
+        notes:r.notes||''
+      };
+    }
 
     const idToLot={};
     lots=(lotRows||[]).map(r=>{
@@ -868,6 +1102,7 @@ function subscribeSupabaseRealtime(){
       .on('postgres_changes',{event:'*',schema:'public',table:'lots'},()=>{if(!shouldDeferLiveSync())pullFromSupabase()})
       .on('postgres_changes',{event:'*',schema:'public',table:'operational_records'},()=>{if(!shouldDeferLiveSync())pullFromSupabase()})
       .on('postgres_changes',{event:'*',schema:'public',table:'movements'},()=>{if(!shouldDeferLiveSync())pullFromSupabase()})
+      .on('postgres_changes',{event:'*',schema:'public',table:'product_rules'},()=>{if(!shouldDeferLiveSync())pullFromSupabase()})
       .subscribe();
   }catch(e){console.error(e)}
 }
@@ -1057,6 +1292,7 @@ function applyPermissions(){
   });
   const live=document.getElementById('livePanel');
   if(live) live.classList.toggle('show',isAdmin());
+  if(!isAdmin()){hideRulesPanel();hideUsersPanel();}
 
   if(!isAdmin()){
     activeOperationalRole=currentUser?.role==='cut'?'cut':'forklift';
@@ -1274,11 +1510,15 @@ async function readFile(file,silent=false){
     const data=await file.arrayBuffer();
     const wb=XLSX.read(data,{type:'array',cellDates:true});
     const fileBase=String(file.name||'').replace(/\.[^.]+$/,'').trim();
-    const incoming=parseWorkbook(wb).map(x=>({
-      ...x,
-      lot:(x.lot && !isHeaderLike(x.lot) ? x.lot : (/^N?\d{5,}$/i.test(fileBase)?fileBase:(x.lot||''))),
-      sourceFile:file.name
-    }));
+    const incoming=parseWorkbook(wb).map(x=>{
+      const rule=getSheetRule(x.product||x.sheet);
+      return {
+        ...x,
+        lot:(x.lot && !isHeaderLike(x.lot) ? x.lot : (/^N?\d{5,}$/i.test(fileBase)?fileBase:(x.lot||''))),
+        description:x.description||rule.description||'',
+        sourceFile:file.name
+      };
+    });
 
     if(!incoming.length){
       const msg=`O arquivo ${escapeHtml(file.name)} foi lido, mas nenhuma aba com <b>LOTE preenchido</b> foi encontrada.`;
@@ -1405,12 +1645,312 @@ async function refreshLinked(){
   showMsg('Planilhas atualizadas',`${linkedHandles.length} arquivo(s) relido(s). As demais planilhas carregadas foram mantidas.`);
 }
 
+
+
+let adminProfiles=[];
+
+function hideUsersPanel(){
+  document.getElementById('usersPanel')?.classList.remove('active');
+}
+async function showUsersPanel(){
+  if(!isAdmin()){showMsg('Acesso restrito','Somente o administrador pode acessar os usuários.');return}
+  if(dirty)saveCurrent(false);
+  currentIndex=-1;
+  hideRulesPanel();
+  document.getElementById('overview').classList.remove('active');
+  document.getElementById('workspace').classList.remove('active');
+  document.getElementById('usersPanel').classList.add('active');
+  document.querySelectorAll('.nav button[id^="nav"]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('navUsers')?.classList.add('active');
+  clearNewUserForm();
+  await loadAdminProfiles();
+}
+async function loadAdminProfiles(){
+  const body=document.getElementById('usersBody');
+  if(body)body.innerHTML='<tr><td colspan="3" style="text-align:center;color:#888;padding:20px">Carregando...</td></tr>';
+  try{
+    if(!onlineMode||!supabaseClient)throw new Error('Supabase não está conectado.');
+    const {data,error}=await supabaseClient.from('profiles').select('id,display_name,role').order('display_name',{ascending:true});
+    if(error)throw error;
+    adminProfiles=data||[];
+    renderUsers();
+  }catch(e){
+    if(body)body.innerHTML=`<tr><td colspan="3" style="text-align:center;color:#ff9898;padding:20px">${escapeHtml(e.message||String(e))}</td></tr>`;
+  }
+}
+function renderUsers(){
+  const body=document.getElementById('usersBody');
+  if(!body)return;
+  const q=(document.getElementById('userSearch')?.value||'').toLowerCase().trim();
+  const rows=(adminProfiles||[]).filter(u=>[u.display_name,u.role,roleLabel(u.role)].join(' ').toLowerCase().includes(q));
+  const count=document.getElementById('usersCount');
+  if(count)count.textContent=`${rows.length} ${rows.length===1?'usuário':'usuários'}`;
+  if(!rows.length){
+    body.innerHTML='<tr><td colspan="3" style="text-align:center;color:#888;padding:24px">Nenhum usuário encontrado.</td></tr>';
+    return;
+  }
+  body.innerHTML=rows.map(u=>`<tr>
+    <td><b>${escapeHtml(u.display_name||'—')}</b></td>
+    <td><span class="user-role-tag">${escapeHtml(roleLabel(u.role))}</span></td>
+    <td class="user-login">${escapeHtml(profileEmail(u.display_name||'',u.role||''))}</td>
+  </tr>`).join('');
+}
+function focusNewUser(){
+  document.getElementById('newUserName')?.focus();
+}
+function clearNewUserForm(){
+  const n=document.getElementById('newUserName');
+  const r=document.getElementById('newUserRole');
+  const p1=document.getElementById('newUserPassword');
+  const p2=document.getElementById('newUserPassword2');
+  const st=document.getElementById('userSaveStatus');
+  if(n)n.value=''; if(r)r.value='forklift'; if(p1)p1.value=''; if(p2)p2.value='';
+  if(st)st.textContent='';
+  previewNewUserLogin();
+}
+function previewNewUserLogin(){
+  const name=(document.getElementById('newUserName')?.value||'').trim();
+  const role=document.getElementById('newUserRole')?.value||'forklift';
+  const preview=document.getElementById('newUserLoginPreview');
+  if(preview)preview.value=name?profileEmail(name,role):'';
+}
+document.addEventListener('input',e=>{
+  if(e.target?.id==='newUserName')previewNewUserLogin();
+});
+async function registerNewUser(){
+  if(!isAdmin())return;
+  const name=(document.getElementById('newUserName')?.value||'').trim();
+  const role=document.getElementById('newUserRole')?.value||'forklift';
+  const password=document.getElementById('newUserPassword')?.value||'';
+  const password2=document.getElementById('newUserPassword2')?.value||'';
+  const st=document.getElementById('userSaveStatus');
+  const btn=document.getElementById('createUserBtn');
+
+  const fail=msg=>{if(st){st.style.color='#ff9898';st.textContent=msg}};
+  if(!name)return fail('Informe o nome do usuário.');
+  if(name.length<2)return fail('Informe um nome válido.');
+  if(password.length<6)return fail('A senha precisa ter pelo menos 6 caracteres.');
+  if(password!==password2)return fail('As senhas não conferem.');
+  if(!['admin','forklift','cut'].includes(role))return fail('Perfil inválido.');
+  if(!onlineMode||!supabaseClient)return fail('Supabase não está conectado.');
+
+  const email=profileEmail(name,role);
+  if((adminProfiles||[]).some(u=>profileEmail(u.display_name||'',u.role||'')===email)){
+    return fail('Já existe um usuário com esse nome e perfil.');
+  }
+
+  if(btn)btn.disabled=true;
+  if(st){st.style.color='#f7d978';st.textContent='Criando usuário...'}
+
+  try{
+    const cfg=readSupabaseConfig();
+    const tempClient=window.supabase.createClient(cfg.url,cfg.key,{
+      auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
+    });
+
+    const {data,error}=await tempClient.auth.signUp({
+      email,
+      password,
+      options:{data:{display_name:name,role}}
+    });
+    if(error)throw error;
+    if(!data?.user?.id)throw new Error('O Supabase não retornou o ID do novo usuário.');
+
+    const {error:pe}=await supabaseClient.from('profiles').upsert({
+      id:data.user.id,
+      display_name:name,
+      role
+    },{onConflict:'id'});
+    if(pe)throw pe;
+
+    adminProfiles.push({id:data.user.id,display_name:name,role});
+    adminProfiles.sort((a,b)=>String(a.display_name).localeCompare(String(b.display_name),'pt-BR'));
+    renderUsers();
+
+    if(st){
+      st.style.color='#9ef0aa';
+      st.innerHTML=`✓ Usuário <b>${escapeHtml(name)}</b> registrado como <b>${escapeHtml(roleLabel(role))}</b>.`;
+      if(!data.session){
+        st.innerHTML+=`<br><span style="color:#f7d978">Atenção: o Supabase criou a conta aguardando confirmação de e-mail. Para logins internos @nesher.local, desative "Confirm email" em Authentication → Providers → Email.</span>`;
+      }
+    }
+    document.getElementById('newUserPassword').value='';
+    document.getElementById('newUserPassword2').value='';
+  }catch(e){
+    let msg=e.message||String(e);
+    if(String(msg).toLowerCase().includes('already registered'))msg='Este usuário já está registrado no Supabase.';
+    fail('Erro ao registrar: '+msg);
+  }finally{
+    if(btn)btn.disabled=false;
+  }
+}
+
+function ruleTypeLabel(type){
+  return {normal:'Normal',multiplier:'Multiplicador',fractional:'Fracionada',integer:'Somente inteiro'}[type]||type;
+}
+function showRulesPanel(){
+  if(!isAdmin()){showMsg('Acesso restrito','Somente o administrador pode acessar as regras.');return}
+  hideUsersPanel();
+  if(dirty)saveCurrent(false);
+  currentIndex=-1;
+  document.getElementById('overview').classList.remove('active');
+  document.getElementById('workspace').classList.remove('active');
+  document.getElementById('rulesPanel').classList.add('active');
+  document.querySelectorAll('.nav button[id^="nav"]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('navRules')?.classList.add('active');
+  renderRules();
+}
+function hideRulesPanel(){
+  document.getElementById('rulesPanel')?.classList.remove('active');
+}
+function renderRules(){
+  const body=document.getElementById('rulesBody');
+  if(!body)return;
+  const q=(document.getElementById('ruleSearch')?.value||'').toLowerCase().trim();
+  const rows=Object.entries(SHEET_RULES)
+    .map(([code,r])=>({code,...r}))
+    .filter(r=>[r.code,r.description,r.type,r.notes].join(' ').toLowerCase().includes(q))
+    .sort((a,b)=>a.code.localeCompare(b.code,'pt-BR',{numeric:true}));
+  const count=document.getElementById('rulesCount');
+  if(count)count.textContent=`${rows.length} ${rows.length===1?'regra':'regras'}`;
+  if(!rows.length){
+    body.innerHTML='<tr><td colspan="7" style="text-align:center;color:#888;padding:24px">Nenhuma regra encontrada.</td></tr>';
+    return;
+  }
+  body.innerHTML=rows.map(r=>`<tr>
+    <td class="rules-code">${escapeHtml(r.code)}</td>
+    <td>${escapeHtml(r.description||'—')}</td>
+    <td><span class="rule-type-tag">${escapeHtml(ruleTypeLabel(r.type||'normal'))}</span></td>
+    <td>${formatNumber(Number(r.factor)||1)}</td>
+    <td>${r.allowDecimal!==false?'SIM':'NÃO'}</td>
+    <td><span class="rule-state ${r.active===false?'off':'on'}">${r.active===false?'INATIVA':'ATIVA'}</span></td>
+    <td><div class="rule-actions">
+      <button class="btn" onclick="editRule('${escapeAttr(r.code)}')">Editar</button>
+      <button class="btn ${r.active===false?'success':'warn'}" onclick="toggleRuleActive('${escapeAttr(r.code)}')">${r.active===false?'Ativar':'Desativar'}</button>
+    </div></td>
+  </tr>`).join('');
+}
+function newRule(){
+  clearRuleForm();
+  document.getElementById('ruleCode')?.focus();
+}
+function clearRuleForm(){
+  editingRuleCode='';
+  const set=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val};
+  set('ruleCode','');set('ruleDescription','');set('ruleType','normal');set('ruleFactor','1');set('ruleNotes','');
+  const dec=document.getElementById('ruleAllowDecimal');if(dec)dec.checked=true;
+  const act=document.getElementById('ruleActive');if(act)act.checked=true;
+  const title=document.getElementById('ruleEditorTitle');if(title)title.textContent='Nova regra';
+  const st=document.getElementById('ruleSaveStatus');if(st)st.textContent='';
+  syncRuleForm();
+}
+function editRule(code){
+  const r=SHEET_RULES[String(code)]||{};
+  editingRuleCode=String(code);
+  document.getElementById('ruleCode').value=code;
+  document.getElementById('ruleDescription').value=r.description||'';
+  document.getElementById('ruleType').value=r.type||'normal';
+  document.getElementById('ruleFactor').value=Number(r.factor)||1;
+  document.getElementById('ruleAllowDecimal').checked=r.allowDecimal!==false;
+  document.getElementById('ruleActive').checked=r.active!==false;
+  document.getElementById('ruleNotes').value=r.notes||'';
+  document.getElementById('ruleEditorTitle').textContent=`Editar ${code}`;
+  syncRuleForm();
+  document.getElementById('ruleEditor')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function syncRuleForm(){
+  const type=document.getElementById('ruleType')?.value||'normal';
+  const factor=document.getElementById('ruleFactor');
+  const dec=document.getElementById('ruleAllowDecimal');
+  if(type==='normal'){if(factor)factor.value='1'}
+  if(type==='fractional'){if(factor)factor.value='1';if(dec)dec.checked=true}
+  if(type==='integer'){if(factor)factor.value='1';if(dec)dec.checked=false}
+  if(factor)factor.disabled=type!=='multiplier';
+  if(dec)dec.disabled=type==='fractional'||type==='integer';
+}
+async function saveRule(){
+  if(!isAdmin())return;
+  const code=(document.getElementById('ruleCode')?.value||'').trim();
+  const description=(document.getElementById('ruleDescription')?.value||'').trim();
+  const type=document.getElementById('ruleType')?.value||'normal';
+  const factor=Number(String(document.getElementById('ruleFactor')?.value||'1').replace(',','.'))||1;
+  const allowDecimal=!!document.getElementById('ruleAllowDecimal')?.checked;
+  const active=!!document.getElementById('ruleActive')?.checked;
+  const notes=(document.getElementById('ruleNotes')?.value||'').trim();
+  const st=document.getElementById('ruleSaveStatus');
+
+  if(!code){if(st){st.style.color='#ff9898';st.textContent='Informe o código do produto.'}return}
+  if(!description){if(st){st.style.color='#ff9898';st.textContent='Informe a descrição.'}return}
+  if(type==='multiplier' && factor<=0){if(st){st.style.color='#ff9898';st.textContent='O fator precisa ser maior que zero.'}return}
+  if(editingRuleCode && editingRuleCode!==code && SHEET_RULES[code]){
+    if(st){st.style.color='#ff9898';st.textContent='Já existe uma regra com esse código.'}
+    return;
+  }
+
+  const normalized={
+    description,type,
+    factor:type==='multiplier'?factor:1,
+    allowDecimal:type==='integer'?false:type==='fractional'?true:allowDecimal,
+    active,notes
+  };
+
+  if(st){st.style.color='#f7d978';st.textContent='Salvando regra...'}
+
+  try{
+    if(onlineMode&&supabaseClient){
+      const payload={
+        product_code:code,
+        description:normalized.description,
+        rule_type:normalized.type,
+        factor:normalized.factor,
+        allow_decimal:normalized.allowDecimal,
+        active:normalized.active,
+        notes:normalized.notes||null,
+        sheets_per_package:1
+      };
+      const {error}=await supabaseClient.from('product_rules')
+        .upsert(payload,{onConflict:'product_code'});
+      if(error)throw error;
+      if(editingRuleCode && editingRuleCode!==code){
+        const {error:delError}=await supabaseClient.from('product_rules').delete().eq('product_code',editingRuleCode);
+        if(delError)throw delError;
+        delete SHEET_RULES[editingRuleCode];
+      }
+    }
+    SHEET_RULES[code]=normalized;
+    editingRuleCode=code;
+    renderRules();
+    renderLots();
+    if(st){st.style.color='#9ef0aa';st.textContent='✓ Regra salva com sucesso.'}
+  }catch(e){
+    if(st){st.style.color='#ff9898';st.textContent='Erro ao salvar: '+(e.message||String(e))}
+  }
+}
+async function toggleRuleActive(code){
+  if(!isAdmin())return;
+  const r=SHEET_RULES[code];
+  if(!r)return;
+  const next=r.active===false;
+  try{
+    if(onlineMode&&supabaseClient){
+      const {error}=await supabaseClient.from('product_rules').update({active:next}).eq('product_code',code);
+      if(error)throw error;
+    }
+    r.active=next;
+    renderRules();
+    renderLots();
+  }catch(e){showMsg('Erro ao alterar regra',escapeHtml(e.message||String(e)))}
+}
+
+
 function setView(view){
+  hideUsersPanel();
   if(view==='done' && !isAdmin()){
     showMsg('Acesso restrito','Operadores acessam somente Todos os lotes e Lotes em aberto.');
     view='all';
   }
   currentView=view;
+  hideRulesPanel();
   document.getElementById('overview').classList.add('active');
   document.getElementById('workspace').classList.remove('active');
   document.querySelectorAll('.filter-tabs button').forEach(b=>b.classList.remove('active'));
@@ -1430,16 +1970,23 @@ function lotMatchesView(x){
   if(currentView==='open')return !done;
   return true;
 }
-function getPackageSize(product){return PACKAGE_RULES[String(product||'').trim()]||null}
+function getSheetRule(product){
+  const code=String(product||'').trim();
+  const rule=SHEET_RULES[code];
+  if(rule && rule.active!==false) return rule;
+  return {description:rule?.description||'',type:'normal',factor:1,allowDecimal:true,active:false,notes:rule?.notes||''};
+}
+function getPackageSize(product){return null;}
 function formatNumber(n){
   if(!Number.isFinite(n))return '0';
   return Number.isInteger(n)?String(n):n.toFixed(2).replace('.',',');
 }
 function calcRecord(x,rec){
+  const rule=getSheetRule(x.product||x.sheet);
   const sheets=(rec.movements||[]).reduce((s,m)=>s+(Number(String(m.sheetQty||0).replace(',','.'))||0),0);
   const initial=Number(String(x.qty||0).replace(',','.'))||0;
-  const used=sheets;
-  return {sheets,initial,used,balance:initial-used};
+  const used=sheets*(Number(rule.factor)||1);
+  return {sheets,initial,used,balance:initial-used,rule};
 }
 function renderLots(){
   const q=(document.getElementById('search').value||'').toLowerCase().trim();
@@ -1472,7 +2019,8 @@ function renderLots(){
         <span class="badge ${done?'done':'open'}">${done?'CONCLUÍDO':'ABERTO'}</span>
       </div>
       <div class="prod">Produto ${escapeHtml(x.product||x.sheet)}</div>
-      <div class="desc">${escapeHtml(x.description||'Descrição não informada')}</div>
+      <div class="desc">${escapeHtml(x.description||getSheetRule(x.product||x.sheet).description||'Descrição não informada')}</div>
+      ${SHEET_RULES[String(x.product||x.sheet||'').trim()]?`<div class="activity-line">Regra: <b>NORMAL</b></div>`:''}
       <div class="meta"><span>${escapeHtml(roleLabel(activeOperationalRole))}</span><span>Saldo: ${formatNumber(c.balance)} chapas</span></div>
       ${done&&rec.completedAt?`<div class="activity-line">Concluído em: <b>${escapeHtml(formatDateTimeDisplay(rec.completedAt))}</b></div>`:''}
       ${x.sourceFile?`<div class="activity-line">Planilha: <b>${escapeHtml(x.sourceFile)}</b></div>`:''}
@@ -1490,6 +2038,8 @@ function updateKpis(){
 
 function openLot(i){
   if(dirty)saveCurrent(false);
+  hideRulesPanel();
+  hideUsersPanel();
   currentIndex=i;
   const x=lots[i];
   const rec=getRoleRecord(x);
@@ -1497,7 +2047,7 @@ function openLot(i){
   document.getElementById('workspace').classList.add('active');
   document.getElementById('vLot').textContent=x.lot||'';
   document.getElementById('vProduct').textContent=x.product||x.sheet||'';
-  document.getElementById('vDesc').textContent=x.description||'';
+  document.getElementById('vDesc').textContent=x.description||getSheetRule(x.product||x.sheet).description||'';
   document.getElementById('vInitialQty').value=x.qty??'';
   document.getElementById('vConclusion').value=rec.conclusion||'';
   document.getElementById('sheetSubtitle').textContent=`Lote ${x.lot||'-'} • Produto ${x.product||x.sheet||'-'} • ${roleLabel(activeOperationalRole)}`;
@@ -1509,7 +2059,7 @@ function openLot(i){
     const m=(rec.movements||[])[r]||{};
     return `<tr class="mov">
       <td class="editable"><input class="date-icon-only" type="date" value="${dateInputValue(m.date)}" data-r="${r}" data-f="date" title="Selecionar data" onchange="stampResponsible(${r});markDirty();renderMovementHistory()"></td>
-      <td class="editable"><input type="number" step="0.01" min="0" value="${escapeAttr(m.sheetQty||'')}" data-r="${r}" data-f="sheetQty" oninput="stampResponsible(${r});markDirty();updateBalanceUI();renderMovementHistory()"></td>
+      <td class="editable"><input type="number" step="${getSheetRule(x.product||x.sheet).allowDecimal?'0.01':'1'}" min="0" value="${escapeAttr(m.sheetQty||'')}" data-r="${r}" data-f="sheetQty" oninput="stampResponsible(${r});markDirty();updateBalanceUI();renderMovementHistory()"></td>
       <td class="editable"><input class="signature-locked" value="${escapeAttr(m.responsible||'')}" data-r="${r}" data-f="responsible" readonly></td>
     </tr>`;
   }).join('');
@@ -1698,15 +2248,21 @@ function syncLotStatusUI(rec){
   const mf=document.getElementById('mobileFinalizeBtn');if(mf)mf.style.display=done?'none':'inline-flex';
 }
 function calculateUsedSheets(){
-  return [...document.querySelectorAll('#movementRows [data-f="sheetQty"]')]
+  const raw=[...document.querySelectorAll('#movementRows [data-f="sheetQty"]')]
     .reduce((s,e)=>s+(Number(String(e.value||0).replace(',','.'))||0),0);
+  const x=lots[currentIndex]||{};
+  const rule=getSheetRule(x.product||x.sheet);
+  return raw*(Number(rule.factor)||1);
 }
 function updateBalanceUI(){
   if(currentIndex<0)return;
   const x=lots[currentIndex];
   const ruleEl=document.getElementById('ruleText');
   const balEl=document.getElementById('balanceText');
-  ruleEl.textContent='Quantidade de chapas';
+  const activeRule=getSheetRule(x.product||x.sheet);
+  ruleEl.textContent=activeRule.type==='normal'
+    ? `Regra normal • 1 lançada = ${formatNumber(Number(activeRule.factor)||1)} consumida`
+    : `${activeRule.type} • fator ${formatNumber(Number(activeRule.factor)||1)}`;
   const total=Number(String(document.getElementById('vInitialQty').value||0).replace(',','.'))||0;
   const used=calculateUsedSheets();
   const balance=total-used;
@@ -1723,6 +2279,8 @@ function updateBalanceUI(){
 }
 function showOverview(){
   if(dirty)saveCurrent(false);
+  hideRulesPanel();
+  hideUsersPanel();
   currentIndex=-1;
   document.getElementById('workspace').classList.remove('active');
   document.getElementById('overview').classList.add('active');
