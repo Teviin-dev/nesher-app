@@ -394,6 +394,28 @@ body.mobile-mode .sheet .conclusion textarea{min-height:90px;font-size:16px!impo
 
 
 
+
+/* V29 - PLANILHAS E RELATÓRIOS */
+.files-panel,.reports-panel{display:none}
+.files-panel.active,.reports-panel.active{display:block}
+.admin-panel-card{background:#111214;border:1px solid #302a20;border-radius:14px;padding:14px;margin-bottom:14px}
+.warning-box{margin:0 0 12px;padding:11px 12px;border:1px solid #6e5620;background:rgba(255,199,56,.06);border-radius:9px;color:#ddc980;font-size:12px;line-height:1.5}
+.danger-btn{border-color:#713737!important;color:#ff9a9a!important;background:rgba(180,48,48,.08)!important}
+.danger-btn:hover{background:rgba(180,48,48,.18)!important}
+.report-filter-grid{display:grid;grid-template-columns:220px 180px;gap:12px}
+.report-filter-grid label{font-size:11px;color:#aaa;display:flex;flex-direction:column;gap:6px}
+.report-filter-grid select{background:#0c0d0e;color:#fff;border:1px solid #373327;border-radius:8px;padding:10px;outline:none}
+.report-kpis{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.file-name-main{font-weight:800;color:#f0f0f0}
+.file-name-sub{font-size:10px;color:#777;margin-top:3px}
+@media(max-width:760px){
+  .report-filter-grid{grid-template-columns:1fr 1fr}
+  .report-kpis{grid-template-columns:1fr 1fr}
+}
+@media(max-width:500px){
+  .report-filter-grid,.report-kpis{grid-template-columns:1fr}
+}
+
 /* V27 - ADMINISTRAÇÃO DE USUÁRIOS */
 .users-panel{display:none}
 .users-panel.active{display:block}
@@ -498,6 +520,8 @@ body.mobile-mode .rule-form-grid .full{grid-column:auto}
       <button id="navDone" data-admin-only onclick="setView('done')">✓ Concluídos</button>
       <button id="navRules" data-admin-only onclick="showRulesPanel()">⚙ Regras de Chapas</button>
       <button id="navUsers" data-admin-only onclick="showUsersPanel()">👤 Usuários</button>
+      <button id="navFiles" data-admin-only onclick="showFilesPanel()">🗂 Planilhas</button>
+      <button id="navReports" data-admin-only onclick="showReportsPanel()">▤ Relatório mensal</button>
       <button id="installPwaBtn" style="display:none" onclick="installPWA()">⬇ Instalar aplicativo</button>
       <button data-admin-only onclick="document.getElementById('fileInput').click()">↥ Importar planilha</button>
       <button data-admin-only onclick="linkSpreadsheet()">⛓ Vincular planilha</button>
@@ -547,6 +571,103 @@ body.mobile-mode .rule-form-grid .full{grid-column:auto}
         <button data-admin-only class="btn" onclick="refreshLinked()">Atualizar dados</button>
       </div>
       <div id="lots" class="lots"></div>
+    </section>
+
+    <section id="filesPanel" class="files-panel">
+      <div class="topbar">
+        <div>
+          <h2>Planilhas importadas</h2>
+          <p>Gerencie os arquivos que já foram incluídos no sistema.</p>
+        </div>
+        <div class="actions">
+          <button class="btn" onclick="showOverview()">← Voltar</button>
+          <button class="btn primary" onclick="document.getElementById('fileInput').click()">↥ Importar nova planilha</button>
+        </div>
+      </div>
+
+      <div class="admin-panel-card">
+        <div class="rules-toolbar">
+          <input id="fileSearch" class="search" placeholder="Buscar planilha..." oninput="renderImportedFiles()">
+          <span id="filesCount" class="badge open">0 planilhas</span>
+        </div>
+        <div class="warning-box">
+          Ao apagar uma planilha, os lotes originados dela e seus apontamentos de Empilhadeira/Corte também serão excluídos do banco.
+        </div>
+        <div class="rules-table-wrap">
+          <table class="rules-table">
+            <thead>
+              <tr>
+                <th>PLANILHA</th>
+                <th>LOTES</th>
+                <th>CHAPAS INICIAIS</th>
+                <th>AÇÃO</th>
+              </tr>
+            </thead>
+            <tbody id="filesBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="reportsPanel" class="reports-panel">
+      <div class="topbar">
+        <div>
+          <h2>Relatório mensal de chapas cortadas</h2>
+          <p>Relatório baseado nos apontamentos realizados pelo setor de Corte.</p>
+        </div>
+        <div class="actions">
+          <button class="btn" onclick="showOverview()">← Voltar</button>
+          <button class="btn primary" onclick="exportMonthlyCutReport()">↓ Gerar Excel</button>
+        </div>
+      </div>
+
+      <div class="report-filters admin-panel-card">
+        <div class="report-filter-grid">
+          <label>Mês
+            <select id="reportMonth" onchange="renderMonthlyReportPreview()">
+              <option value="1">Janeiro</option>
+              <option value="2">Fevereiro</option>
+              <option value="3">Março</option>
+              <option value="4">Abril</option>
+              <option value="5">Maio</option>
+              <option value="6">Junho</option>
+              <option value="7">Julho</option>
+              <option value="8">Agosto</option>
+              <option value="9">Setembro</option>
+              <option value="10">Outubro</option>
+              <option value="11">Novembro</option>
+              <option value="12">Dezembro</option>
+            </select>
+          </label>
+          <label>Ano
+            <select id="reportYear" onchange="renderMonthlyReportPreview()"></select>
+          </label>
+        </div>
+      </div>
+
+      <div class="report-kpis">
+        <div class="kpi"><div class="label">CHAPAS CORTADAS</div><div class="value gold" id="reportTotalSheets">0</div></div>
+        <div class="kpi"><div class="label">LOTES MOVIMENTADOS</div><div class="value" id="reportLots">0</div></div>
+        <div class="kpi"><div class="label">PRODUTOS</div><div class="value" id="reportProducts">0</div></div>
+        <div class="kpi"><div class="label">APONTAMENTOS</div><div class="value" id="reportEntries">0</div></div>
+      </div>
+
+      <div class="admin-panel-card">
+        <div class="live-head"><strong>RESUMO POR PRODUTO</strong><span id="reportPeriodLabel" class="badge open"></span></div>
+        <div class="rules-table-wrap">
+          <table class="rules-table">
+            <thead>
+              <tr>
+                <th>CÓDIGO</th>
+                <th>DESCRIÇÃO</th>
+                <th>CHAPAS CORTADAS</th>
+                <th>LOTES</th>
+              </tr>
+            </thead>
+            <tbody id="reportSummaryBody"></tbody>
+          </table>
+        </div>
+      </div>
     </section>
 
     <section id="usersPanel" class="users-panel">
@@ -608,7 +729,7 @@ body.mobile-mode .rule-form-grid .full{grid-column:auto}
             </label>
           </div>
           <div class="note" style="margin-top:10px">
-            O operador continuará entrando com <b>Nome + Perfil + Senha</b>. O login interno é gerado automaticamente.
+            O operador continuará entrando com <b>Nome + Perfil + Senha</b>. O e-mail técnico é usado somente pelo Supabase.
           </div>
           <div class="rule-form-actions">
             <button class="btn" onclick="clearNewUserForm()">Limpar</button>
@@ -828,6 +949,10 @@ function profileEmail(name,profile){
   const suffix={forklift:'emp',cut:'corte',admin:'admin'}[profile]||profile;
   return `${slugUserName(name)}.${suffix}@nesher.local`;
 }
+function profileSignupEmail(name,profile){
+  const suffix={forklift:'emp',cut:'corte',admin:'admin'}[profile]||profile;
+  return `${slugUserName(name)}.${suffix}@nesher.example.com`;
+}
 function readSupabaseConfig(){
   try{
     const saved=JSON.parse(localStorage.getItem(SB_CFG_KEY)||'null');
@@ -935,20 +1060,34 @@ async function remoteLogin(name,profile,password){
   if(!profile)throw new Error('Selecione um perfil.');
   if(!password)throw new Error('Digite a senha.');
 
-  const email=profileEmail(name,profile);
+  const candidates=[profileEmail(name,profile),profileSignupEmail(name,profile)];
   const loginError=document.getElementById('loginError');
-  if(loginError)loginError.textContent=`Tentando entrar como ${email}...`;
+  let data=null;
+  let lastError=null;
+  let usedEmail='';
 
-  const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
-  if(error){
-    const msg=(error.message||'').toLowerCase();
+  for(const email of candidates){
+    if(loginError)loginError.textContent=`Tentando entrar como ${email}...`;
+    const result=await supabaseClient.auth.signInWithPassword({email,password});
+    if(!result.error){
+      data=result.data;
+      usedEmail=email;
+      break;
+    }
+    lastError=result.error;
+    const msg=(result.error.message||'').toLowerCase();
+    if(!msg.includes('invalid login credentials'))break;
+  }
+
+  if(!data){
+    const msg=(lastError?.message||'').toLowerCase();
     if(msg.includes('invalid login credentials')){
-      throw new Error(`Usuário ou senha incorretos. Login tentado: ${email}`);
+      throw new Error('Usuário ou senha incorretos.');
     }
     if(msg.includes('email not confirmed')){
-      throw new Error(`O usuário ${email} ainda não está confirmado no Supabase.`);
+      throw new Error('Este usuário ainda não está confirmado no Supabase.');
     }
-    throw new Error(`Falha no login (${email}): ${error.message||'erro desconhecido'}`);
+    throw new Error(`Falha no login: ${lastError?.message||'erro desconhecido'}`);
   }
 
   const user=data.user;
@@ -957,7 +1096,7 @@ async function remoteLogin(name,profile,password){
 
   if(pe){
     await supabaseClient.auth.signOut();
-    throw new Error(`Login autenticado, mas o perfil não foi encontrado na tabela profiles. Verifique o UID deste usuário. Detalhe: ${pe.message}`);
+    throw new Error(`Login autenticado, mas o perfil não foi encontrado na tabela profiles. Detalhe: ${pe.message}`);
   }
   if(profileRow.role!==profile){
     await supabaseClient.auth.signOut();
@@ -967,7 +1106,8 @@ async function remoteLogin(name,profile,password){
   return {
     username:profile,role:profile,
     name:profileRow.display_name||name,
-    profileName:USERS[profile]?.profileName||roleLabel(profile)
+    profileName:USERS[profile]?.profileName||roleLabel(profile),
+    authEmail:usedEmail
   };
 }
 async function remoteLogout(){
@@ -1008,7 +1148,7 @@ async function pullFromSupabase(){
     lots=(lotRows||[]).map(r=>{
       const x={
         dbId:r.id,sheet:r.product_code,lot:r.lot_code,product:r.product_code,
-        description:r.description||'',qty:r.initial_qty??'',sourceFile:r.source_file||''
+        description:r.description||'',qty:r.initial_qty??'',sourceFile:r.source_file||'',importedAt:r.imported_at||''
       };
       idToLot[r.id]=x;
       return x;
@@ -1292,7 +1432,7 @@ function applyPermissions(){
   });
   const live=document.getElementById('livePanel');
   if(live) live.classList.toggle('show',isAdmin());
-  if(!isAdmin()){hideRulesPanel();hideUsersPanel();}
+  if(!isAdmin()){hideRulesPanel();hideUsersPanel();hideAdminExtraPanels();}
 
   if(!isAdmin()){
     activeOperationalRole=currentUser?.role==='cut'?'cut':'forklift';
@@ -1647,6 +1787,259 @@ async function refreshLinked(){
 
 
 
+
+function hideFilesPanel(){document.getElementById('filesPanel')?.classList.remove('active')}
+function hideReportsPanel(){document.getElementById('reportsPanel')?.classList.remove('active')}
+function hideAdminExtraPanels(){hideFilesPanel();hideReportsPanel()}
+
+function showFilesPanel(){
+  if(!isAdmin()){showMsg('Acesso restrito','Somente o administrador pode gerenciar planilhas.');return}
+  if(dirty)saveCurrent(false);
+  currentIndex=-1;
+  hideRulesPanel();hideUsersPanel();hideReportsPanel();
+  document.getElementById('overview').classList.remove('active');
+  document.getElementById('workspace').classList.remove('active');
+  document.getElementById('filesPanel').classList.add('active');
+  document.querySelectorAll('.nav button[id^="nav"]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('navFiles')?.classList.add('active');
+  renderImportedFiles();
+}
+
+function importedFileGroups(){
+  const map={};
+  lots.forEach(x=>{
+    const name=String(x.sourceFile||'').trim();
+    if(!name || name==='Exemplo')return;
+    if(!map[name])map[name]={name,lots:[],qty:0};
+    map[name].lots.push(x);
+    map[name].qty+=Number(String(x.qty||0).replace(',','.'))||0;
+  });
+  return Object.values(map).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{numeric:true}));
+}
+
+function renderImportedFiles(){
+  const body=document.getElementById('filesBody');
+  if(!body)return;
+  const q=(document.getElementById('fileSearch')?.value||'').toLowerCase().trim();
+  const rows=importedFileGroups().filter(g=>g.name.toLowerCase().includes(q));
+  const count=document.getElementById('filesCount');
+  if(count)count.textContent=`${rows.length} ${rows.length===1?'planilha':'planilhas'}`;
+  if(!rows.length){
+    body.innerHTML='<tr><td colspan="4" style="text-align:center;color:#888;padding:26px">Nenhuma planilha importada encontrada.</td></tr>';
+    return;
+  }
+  body.innerHTML=rows.map(g=>`<tr>
+    <td>
+      <div class="file-name-main">${escapeHtml(g.name)}</div>
+      <div class="file-name-sub">${g.lots.length} ${g.lots.length===1?'lote vinculado':'lotes vinculados'}</div>
+    </td>
+    <td>${g.lots.length}</td>
+    <td>${formatNumber(g.qty)}</td>
+    <td><button class="btn danger-btn" onclick="deleteImportedFile('${escapeAttr(g.name)}')">Apagar</button></td>
+  </tr>`).join('');
+}
+
+async function deleteImportedFile(fileName){
+  if(!isAdmin())return;
+  const group=importedFileGroups().find(g=>g.name===fileName);
+  if(!group)return;
+  const ok=window.confirm(
+    `APAGAR PLANILHA?\n\n${fileName}\n${group.lots.length} lote(s)\n\n`+
+    `Esta ação apagará também os apontamentos de Empilhadeira e Corte relacionados a esses lotes.\n\n`+
+    `Esta ação não pode ser desfeita.`
+  );
+  if(!ok)return;
+
+  try{
+    if(onlineMode&&supabaseClient){
+      const {error}=await supabaseClient.from('lots').delete().eq('source_file',fileName);
+      if(error)throw error;
+      await pullFromSupabase();
+    }else{
+      const removedKeys=new Set(group.lots.map(lotKey));
+      lots=lots.filter(x=>x.sourceFile!==fileName);
+      const map=savedMap();
+      removedKeys.forEach(k=>delete map[k]);
+      persistMap(map);
+      persistMasterLots();
+      renderLots();updateKpis();
+    }
+    renderImportedFiles();
+    showMsg('Planilha apagada',`A planilha <b>${escapeHtml(fileName)}</b> e seus lotes foram removidos do sistema.`);
+  }catch(e){
+    showMsg('Erro ao apagar',escapeHtml(e.message||String(e)));
+  }
+}
+
+function populateReportYears(){
+  const sel=document.getElementById('reportYear');
+  if(!sel)return;
+  const years=new Set([new Date().getFullYear()]);
+  lots.forEach(x=>{
+    const rec=getRoleRecord(x,'cut');
+    (rec.movements||[]).forEach(m=>{
+      const d=parseMovementDate(m.date);
+      if(d)years.add(d.getFullYear());
+    });
+  });
+  const current=String(new Date().getFullYear());
+  sel.innerHTML=[...years].sort((a,b)=>b-a).map(y=>`<option value="${y}">${y}</option>`).join('');
+  if([...years].map(String).includes(current))sel.value=current;
+}
+
+function parseMovementDate(v){
+  if(!v)return null;
+  const s=String(v).trim();
+  let d=null;
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)){
+    const [y,m,day]=s.split('-').map(Number);
+    d=new Date(y,m-1,day);
+  }else{
+    const p=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if(p)d=new Date(Number(p[3]),Number(p[2])-1,Number(p[1]));
+  }
+  return d && !isNaN(d)?d:null;
+}
+
+function monthlyCutRows(month,year){
+  const rows=[];
+  lots.forEach(x=>{
+    const rec=getRoleRecord(x,'cut');
+    const rule=getSheetRule(x.product||x.sheet);
+    (rec.movements||[]).forEach((m,index)=>{
+      const d=parseMovementDate(m.date);
+      const raw=Number(String(m.sheetQty||0).replace(',','.'))||0;
+      if(!d || raw<=0)return;
+      if(d.getMonth()+1!==Number(month) || d.getFullYear()!==Number(year))return;
+      const factor=Number(rule.factor)||1;
+      rows.push({
+        date:d,
+        dateText:d.toLocaleDateString('pt-BR'),
+        lot:String(x.lot||''),
+        product:String(x.product||x.sheet||''),
+        description:String(x.description||rule.description||''),
+        quantity:raw*factor,
+        pointed:raw,
+        factor,
+        responsible:String(m.responsible||rec.lastUser||''),
+        status:normalizeStatus(rec.status)==='done'?'Concluído':'Em aberto',
+        sourceFile:String(x.sourceFile||''),
+        rowIndex:index+1
+      });
+    });
+  });
+  rows.sort((a,b)=>a.date-b.date || a.product.localeCompare(b.product,'pt-BR',{numeric:true}) || a.lot.localeCompare(b.lot,'pt-BR',{numeric:true}));
+  return rows;
+}
+
+function showReportsPanel(){
+  if(!isAdmin()){showMsg('Acesso restrito','Somente o administrador pode gerar relatórios.');return}
+  if(dirty)saveCurrent(false);
+  currentIndex=-1;
+  hideRulesPanel();hideUsersPanel();hideFilesPanel();
+  document.getElementById('overview').classList.remove('active');
+  document.getElementById('workspace').classList.remove('active');
+  document.getElementById('reportsPanel').classList.add('active');
+  document.querySelectorAll('.nav button[id^="nav"]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('navReports')?.classList.add('active');
+  populateReportYears();
+  const now=new Date();
+  const m=document.getElementById('reportMonth');
+  const y=document.getElementById('reportYear');
+  if(m)m.value=String(now.getMonth()+1);
+  if(y && [...y.options].some(o=>o.value===String(now.getFullYear())))y.value=String(now.getFullYear());
+  renderMonthlyReportPreview();
+}
+
+function reportSummary(rows){
+  const map={};
+  rows.forEach(r=>{
+    const key=r.product;
+    if(!map[key])map[key]={product:r.product,description:r.description,quantity:0,lots:new Set()};
+    map[key].quantity+=r.quantity;
+    map[key].lots.add(r.lot);
+  });
+  return Object.values(map).map(x=>({...x,lotCount:x.lots.size})).sort((a,b)=>b.quantity-a.quantity);
+}
+
+function renderMonthlyReportPreview(){
+  const month=Number(document.getElementById('reportMonth')?.value||new Date().getMonth()+1);
+  const year=Number(document.getElementById('reportYear')?.value||new Date().getFullYear());
+  const rows=monthlyCutRows(month,year);
+  const summary=reportSummary(rows);
+  const monthName=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][month-1];
+
+  const total=rows.reduce((s,r)=>s+r.quantity,0);
+  const lotCount=new Set(rows.map(r=>r.lot)).size;
+  const productCount=new Set(rows.map(r=>r.product)).size;
+  document.getElementById('reportTotalSheets').textContent=formatNumber(total);
+  document.getElementById('reportLots').textContent=lotCount;
+  document.getElementById('reportProducts').textContent=productCount;
+  document.getElementById('reportEntries').textContent=rows.length;
+  document.getElementById('reportPeriodLabel').textContent=`${monthName.toUpperCase()} / ${year}`;
+
+  const body=document.getElementById('reportSummaryBody');
+  if(!summary.length){
+    body.innerHTML='<tr><td colspan="4" style="text-align:center;color:#888;padding:26px">Nenhum apontamento de corte encontrado neste período.</td></tr>';
+    return;
+  }
+  body.innerHTML=summary.map(r=>`<tr>
+    <td class="rules-code">${escapeHtml(r.product)}</td>
+    <td>${escapeHtml(r.description||'—')}</td>
+    <td><b>${formatNumber(r.quantity)}</b></td>
+    <td>${r.lotCount}</td>
+  </tr>`).join('');
+}
+
+function exportMonthlyCutReport(){
+  if(!isAdmin())return;
+  if(!window.XLSX){showMsg('Excel indisponível','A biblioteca de Excel não foi carregada. Atualize a página com internet.');return}
+  const month=Number(document.getElementById('reportMonth')?.value||new Date().getMonth()+1);
+  const year=Number(document.getElementById('reportYear')?.value||new Date().getFullYear());
+  const rows=monthlyCutRows(month,year);
+  if(!rows.length){
+    showMsg('Sem dados','Não existem chapas cortadas apontadas no período selecionado.');
+    return;
+  }
+
+  const monthName=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][month-1];
+  const summary=reportSummary(rows);
+  const total=rows.reduce((s,r)=>s+r.quantity,0);
+
+  const wb=XLSX.utils.book_new();
+
+  const resumoData=[
+    ['NESHER - RELATÓRIO MENSAL DE CHAPAS CORTADAS'],
+    ['Período',`${monthName}/${year}`],
+    ['Gerado em',new Date().toLocaleString('pt-BR')],
+    ['Total de chapas cortadas',total],
+    [],
+    ['Código','Descrição','Chapas cortadas','Lotes']
+  ];
+  summary.forEach(r=>resumoData.push([r.product,r.description,r.quantity,r.lotCount]));
+  resumoData.push([]);
+  resumoData.push(['TOTAL','','',total]);
+  const wsResumo=XLSX.utils.aoa_to_sheet(resumoData);
+  wsResumo['!cols']=[{wch:16},{wch:38},{wch:18},{wch:12}];
+
+  const detalheData=[
+    ['Data','Lote','Código','Descrição','Quantidade apontada','Fator','Chapas cortadas','Responsável','Status','Planilha de origem']
+  ];
+  rows.forEach(r=>detalheData.push([
+    r.dateText,r.lot,r.product,r.description,r.pointed,r.factor,r.quantity,r.responsible,r.status,r.sourceFile
+  ]));
+  const wsDetalhe=XLSX.utils.aoa_to_sheet(detalheData);
+  wsDetalhe['!cols']=[
+    {wch:12},{wch:16},{wch:12},{wch:34},{wch:20},{wch:10},{wch:18},{wch:32},{wch:14},{wch:28}
+  ];
+  wsDetalhe['!autofilter']={ref:`A1:J${detalheData.length}`};
+
+  XLSX.utils.book_append_sheet(wb,wsResumo,'Resumo');
+  XLSX.utils.book_append_sheet(wb,wsDetalhe,'Detalhado');
+  XLSX.writeFile(wb,`NESHER_Chapas_Cortadas_${year}-${String(month).padStart(2,'0')}.xlsx`);
+}
+
+
 let adminProfiles=[];
 
 function hideUsersPanel(){
@@ -1654,6 +2047,7 @@ function hideUsersPanel(){
 }
 async function showUsersPanel(){
   if(!isAdmin()){showMsg('Acesso restrito','Somente o administrador pode acessar os usuários.');return}
+  hideAdminExtraPanels();
   if(dirty)saveCurrent(false);
   currentIndex=-1;
   hideRulesPanel();
@@ -1692,7 +2086,7 @@ function renderUsers(){
   body.innerHTML=rows.map(u=>`<tr>
     <td><b>${escapeHtml(u.display_name||'—')}</b></td>
     <td><span class="user-role-tag">${escapeHtml(roleLabel(u.role))}</span></td>
-    <td class="user-login">${escapeHtml(profileEmail(u.display_name||'',u.role||''))}</td>
+    <td class="user-login">${escapeHtml(profileSignupEmail(u.display_name||'',u.role||''))}</td>
   </tr>`).join('');
 }
 function focusNewUser(){
@@ -1712,7 +2106,7 @@ function previewNewUserLogin(){
   const name=(document.getElementById('newUserName')?.value||'').trim();
   const role=document.getElementById('newUserRole')?.value||'forklift';
   const preview=document.getElementById('newUserLoginPreview');
-  if(preview)preview.value=name?profileEmail(name,role):'';
+  if(preview)preview.value=name?profileSignupEmail(name,role):'';
 }
 document.addEventListener('input',e=>{
   if(e.target?.id==='newUserName')previewNewUserLogin();
@@ -1734,8 +2128,11 @@ async function registerNewUser(){
   if(!['admin','forklift','cut'].includes(role))return fail('Perfil inválido.');
   if(!onlineMode||!supabaseClient)return fail('Supabase não está conectado.');
 
-  const email=profileEmail(name,role);
-  if((adminProfiles||[]).some(u=>profileEmail(u.display_name||'',u.role||'')===email)){
+  const email=profileSignupEmail(name,role);
+  if((adminProfiles||[]).some(u=>
+    profileEmail(u.display_name||'',u.role||'')===profileEmail(name,role) ||
+    profileSignupEmail(u.display_name||'',u.role||'')===email
+  )){
     return fail('Já existe um usuário com esse nome e perfil.');
   }
 
@@ -1790,7 +2187,7 @@ function ruleTypeLabel(type){
 }
 function showRulesPanel(){
   if(!isAdmin()){showMsg('Acesso restrito','Somente o administrador pode acessar as regras.');return}
-  hideUsersPanel();
+  hideUsersPanel();hideAdminExtraPanels();
   if(dirty)saveCurrent(false);
   currentIndex=-1;
   document.getElementById('overview').classList.remove('active');
@@ -1944,7 +2341,7 @@ async function toggleRuleActive(code){
 
 
 function setView(view){
-  hideUsersPanel();
+  hideUsersPanel();hideAdminExtraPanels();
   if(view==='done' && !isAdmin()){
     showMsg('Acesso restrito','Operadores acessam somente Todos os lotes e Lotes em aberto.');
     view='all';
@@ -2040,6 +2437,7 @@ function openLot(i){
   if(dirty)saveCurrent(false);
   hideRulesPanel();
   hideUsersPanel();
+  hideAdminExtraPanels();
   currentIndex=i;
   const x=lots[i];
   const rec=getRoleRecord(x);
@@ -2281,6 +2679,7 @@ function showOverview(){
   if(dirty)saveCurrent(false);
   hideRulesPanel();
   hideUsersPanel();
+  hideAdminExtraPanels();
   currentIndex=-1;
   document.getElementById('workspace').classList.remove('active');
   document.getElementById('overview').classList.add('active');
