@@ -2137,50 +2137,45 @@ async function registerNewUser(){
   }
 
   if(btn)btn.disabled=true;
-  if(st){st.style.color='#f7d978';st.textContent='Criando usuário...'}
+  if(st){st.style.color='#f7d978';st.textContent='Criando usuário no servidor...'}
 
   try{
-    const cfg=readSupabaseConfig();
-    const tempClient=window.supabase.createClient(cfg.url,cfg.key,{
-      auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
-    });
-
-    const {data,error}=await tempClient.auth.signUp({
-      email,
-      password,
-      options:{data:{display_name:name,role}}
+    const {data,error}=await supabaseClient.functions.invoke('admin-create-user',{
+      body:{name,role,password,email}
     });
     if(error)throw error;
-    if(!data?.user?.id)throw new Error('O Supabase não retornou o ID do novo usuário.');
+    if(!data?.ok){
+      throw new Error(data?.error||'O servidor não confirmou a criação do usuário.');
+    }
 
-    const {error:pe}=await supabaseClient.from('profiles').upsert({
-      id:data.user.id,
+    adminProfiles.push({
+      id:data.user?.id||'',
       display_name:name,
       role
-    },{onConflict:'id'});
-    if(pe)throw pe;
-
-    adminProfiles.push({id:data.user.id,display_name:name,role});
+    });
     adminProfiles.sort((a,b)=>String(a.display_name).localeCompare(String(b.display_name),'pt-BR'));
     renderUsers();
 
     if(st){
       st.style.color='#9ef0aa';
-      st.innerHTML=`✓ Usuário <b>${escapeHtml(name)}</b> registrado como <b>${escapeHtml(roleLabel(role))}</b>.`;
-      if(!data.session){
-        st.innerHTML+=`<br><span style="color:#f7d978">Atenção: o Supabase criou a conta aguardando confirmação de e-mail. Para logins internos @nesher.local, desative "Confirm email" em Authentication → Providers → Email.</span>`;
-      }
+      st.innerHTML=`✓ Usuário <b>${escapeHtml(name)}</b> criado e confirmado automaticamente como <b>${escapeHtml(roleLabel(role))}</b>.`;
     }
     document.getElementById('newUserPassword').value='';
     document.getElementById('newUserPassword2').value='';
   }catch(e){
-    let msg=e.message||String(e);
-    if(String(msg).toLowerCase().includes('already registered'))msg='Este usuário já está registrado no Supabase.';
+    let msg=e?.context?.body?.error || e?.message || String(e);
+    try{
+      if(e?.context && typeof e.context.json==='function'){
+        const body=await e.context.json();
+        if(body?.error)msg=body.error;
+      }
+    }catch(_){}
     fail('Erro ao registrar: '+msg);
   }finally{
     if(btn)btn.disabled=false;
   }
 }
+
 
 function ruleTypeLabel(type){
   return {normal:'Normal',multiplier:'Multiplicador',fractional:'Fracionada',integer:'Somente inteiro'}[type]||type;
