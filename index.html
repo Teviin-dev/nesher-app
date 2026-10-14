@@ -468,6 +468,12 @@ body.mobile-mode .rule-form-grid{grid-template-columns:1fr}
 body.mobile-mode .rule-form-grid .full{grid-column:auto}
 
 @media print{body{background:white}.sidebar,.topbar,.grid-kpi,.toolbar,.sheet-toolbar,.note,.info-panel{display:none!important}.app{display:block}.main{padding:0}.workspace{display:block!important}.overview{display:none!important}.sheet-wrap{border:0;padding:0;background:white}.sheet{box-shadow:none;width:100%;min-width:0}.sheet th,.sheet td{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+
+/* V31 - relatório com saldo restante e agrupamento por lote */
+.report-kpis{grid-template-columns:repeat(5,minmax(120px,1fr))}
+@media(max-width:760px){.report-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:500px){.report-kpis{grid-template-columns:1fr}}
+
 </style>
 
 <link rel="manifest" href="/manifest.webmanifest">
@@ -622,6 +628,7 @@ body.mobile-mode .rule-form-grid .full{grid-column:auto}
       </div>
 
       <div class="report-filters admin-panel-card">
+        <p style="margin:0 0 12px;color:#aaa;font-size:12px">As chapas cortadas consideram o mês selecionado. O saldo restante mostra a quantidade que ainda falta cortar nos lotes em aberto, considerando todos os apontamentos atuais. Cada lote aparece uma única vez na aba Detalhado por lote, com a data mais recente do mês.</p>
         <div class="report-filter-grid">
           <label>Mês
             <select id="reportMonth" onchange="renderMonthlyReportPreview()">
@@ -650,6 +657,7 @@ body.mobile-mode .rule-form-grid .full{grid-column:auto}
         <div class="kpi"><div class="label">LOTES MOVIMENTADOS</div><div class="value" id="reportLots">0</div></div>
         <div class="kpi"><div class="label">PRODUTOS</div><div class="value" id="reportProducts">0</div></div>
         <div class="kpi"><div class="label">APONTAMENTOS</div><div class="value" id="reportEntries">0</div></div>
+        <div class="kpi"><div class="label">CHAPAS RESTANTES</div><div class="value gold" id="reportRemainingSheets">0</div></div>
       </div>
 
       <div class="admin-panel-card">
@@ -661,6 +669,7 @@ body.mobile-mode .rule-form-grid .full{grid-column:auto}
                 <th>CÓDIGO</th>
                 <th>DESCRIÇÃO</th>
                 <th>CHAPAS CORTADAS</th>
+                <th>CHAPAS RESTANTES</th>
                 <th>LOTES</th>
               </tr>
             </thead>
@@ -1902,34 +1911,61 @@ function parseMovementDate(v){
 }
 
 function monthlyCutRows(month,year){
-  const rows=[];
+  // Uma linha por lote + código de produto; todos os apontamentos do mês são somados.
+  const grouped=new Map();
   lots.forEach(x=>{
     const rec=getRoleRecord(x,'cut');
     const rule=getSheetRule(x.product||x.sheet);
-    (rec.movements||[]).forEach((m,index)=>{
+    const product=String(x.product||x.sheet||'').trim();
+    const lot=String(x.lot||'').trim();
+    const key=`${lot.toLocaleUpperCase()}|${product.toLocaleUpperCase()}`;
+    const factor=Number(rule.factor)||1;
+    const matching=(rec.movements||[]).map((m,index)=>{
       const d=parseMovementDate(m.date);
       const raw=Number(String(m.sheetQty||0).replace(',','.'))||0;
-      if(!d || raw<=0)return;
-      if(d.getMonth()+1!==Number(month) || d.getFullYear()!==Number(year))return;
-      const factor=Number(rule.factor)||1;
-      rows.push({
-        date:d,
-        dateText:d.toLocaleDateString('pt-BR'),
-        lot:String(x.lot||''),
-        product:String(x.product||x.sheet||''),
+      return {m,index,d,raw};
+    }).filter(v=>v.d && v.raw>0 && v.d.getMonth()+1===Number(month) && v.d.getFullYear()===Number(year));
+    if(!matching.length)return;
+
+    const initial=Number(String(x.qty||0).replace(',','.'))||0;
+    const calc=calcRecord(x,rec);
+    const done=normalizeStatus(rec.status)==='done';
+    const remaining=done?0:Math.max(0,initial-calc.used);
+    const latest=matching.reduce((a,b)=>!a||b.d>a.d?b:a,null);
+    const pointed=matching.reduce((s,v)=>s+v.raw,0);
+    const quantity=pointed*factor;
+    const sourceFile=String(x.sourceFile||'');
+
+    if(!grouped.has(key)){
+      grouped.set(key,{
+        date:latest.d,
+        dateText:latest.d.toLocaleDateString('pt-BR'),
+        lot,product,
         description:String(x.description||rule.description||''),
-        quantity:raw*factor,
-        pointed:raw,
-        factor,
-        responsible:String(m.responsible||rec.lastUser||''),
-        status:normalizeStatus(rec.status)==='done'?'Concluído':'Em aberto',
-        sourceFile:String(x.sourceFile||''),
-        rowIndex:index+1
+        initialQty:initial,
+        pointed, factor, quantity, remaining,
+        responsible:String(latest.m.responsible||rec.lastUser||''),
+        status:done?'Concluído':'Em aberto',
+        sourceFile,
+        movementCount:matching.length
       });
-    });
+    }else{
+      const row=grouped.get(key);
+      row.pointed+=pointed;
+      row.quantity+=quantity;
+      row.remaining=Math.max(row.remaining,remaining);
+      row.initialQty=Math.max(row.initialQty,initial);
+      row.movementCount+=matching.length;
+      if(latest.d>row.date){
+        row.date=latest.d;
+        row.dateText=latest.d.toLocaleDateString('pt-BR');
+        row.responsible=String(latest.m.responsible||rec.lastUser||'');
+      }
+      if(done && row.status!=='Concluído')row.status='Em aberto';
+      if(sourceFile && !row.sourceFile.split(' / ').includes(sourceFile))row.sourceFile=row.sourceFile?`${row.sourceFile} / ${sourceFile}`:sourceFile;
+    }
   });
-  rows.sort((a,b)=>a.date-b.date || a.product.localeCompare(b.product,'pt-BR',{numeric:true}) || a.lot.localeCompare(b.lot,'pt-BR',{numeric:true}));
-  return rows;
+  return [...grouped.values()].sort((a,b)=>b.date-a.date || a.lot.localeCompare(b.lot,'pt-BR',{numeric:true}));
 }
 
 function showReportsPanel(){
@@ -1955,9 +1991,11 @@ function reportSummary(rows){
   const map={};
   rows.forEach(r=>{
     const key=r.product;
-    if(!map[key])map[key]={product:r.product,description:r.description,quantity:0,lots:new Set()};
+    if(!map[key])map[key]={product:r.product,description:r.description,quantity:0,remaining:0,lots:new Set(),movementCount:0};
     map[key].quantity+=r.quantity;
+    map[key].remaining+=r.remaining;
     map[key].lots.add(r.lot);
+    map[key].movementCount+=r.movementCount||1;
   });
   return Object.values(map).map(x=>({...x,lotCount:x.lots.size})).sort((a,b)=>b.quantity-a.quantity);
 }
@@ -1970,23 +2008,27 @@ function renderMonthlyReportPreview(){
   const monthName=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][month-1];
 
   const total=rows.reduce((s,r)=>s+r.quantity,0);
+  const remaining=rows.reduce((s,r)=>s+r.remaining,0);
   const lotCount=new Set(rows.map(r=>r.lot)).size;
   const productCount=new Set(rows.map(r=>r.product)).size;
+  const entries=rows.reduce((s,r)=>s+(r.movementCount||1),0);
   document.getElementById('reportTotalSheets').textContent=formatNumber(total);
   document.getElementById('reportLots').textContent=lotCount;
   document.getElementById('reportProducts').textContent=productCount;
-  document.getElementById('reportEntries').textContent=rows.length;
+  document.getElementById('reportEntries').textContent=entries;
+  document.getElementById('reportRemainingSheets').textContent=formatNumber(remaining);
   document.getElementById('reportPeriodLabel').textContent=`${monthName.toUpperCase()} / ${year}`;
 
   const body=document.getElementById('reportSummaryBody');
   if(!summary.length){
-    body.innerHTML='<tr><td colspan="4" style="text-align:center;color:#888;padding:26px">Nenhum apontamento de corte encontrado neste período.</td></tr>';
+    body.innerHTML='<tr><td colspan="5" style="text-align:center;color:#888;padding:26px">Nenhum apontamento de corte encontrado neste período.</td></tr>';
     return;
   }
   body.innerHTML=summary.map(r=>`<tr>
     <td class="rules-code">${escapeHtml(r.product)}</td>
     <td>${escapeHtml(r.description||'—')}</td>
     <td><b>${formatNumber(r.quantity)}</b></td>
+    <td>${formatNumber(r.remaining)}</td>
     <td>${r.lotCount}</td>
   </tr>`).join('');
 }
@@ -2005,37 +2047,75 @@ function exportMonthlyCutReport(){
   const monthName=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][month-1];
   const summary=reportSummary(rows);
   const total=rows.reduce((s,r)=>s+r.quantity,0);
-
+  const totalRemaining=rows.reduce((s,r)=>s+r.remaining,0);
   const wb=XLSX.utils.book_new();
 
   const resumoData=[
     ['NESHER - RELATÓRIO MENSAL DE CHAPAS CORTADAS'],
     ['Período',`${monthName}/${year}`],
     ['Gerado em',new Date().toLocaleString('pt-BR')],
-    ['Total de chapas cortadas',total],
+    ['Total de chapas cortadas no mês',total],
+    ['Total de chapas restantes nos lotes em aberto (saldo atual)',totalRemaining],
     [],
-    ['Código','Descrição','Chapas cortadas','Lotes']
+    ['Código','Descrição','Chapas cortadas no mês','Chapas restantes para cortar','Lotes']
   ];
-  summary.forEach(r=>resumoData.push([r.product,r.description,r.quantity,r.lotCount]));
+  summary.forEach(r=>resumoData.push([r.product,r.description,r.quantity,r.remaining,r.lotCount]));
   resumoData.push([]);
-  resumoData.push(['TOTAL','','',total]);
+  resumoData.push(['TOTAL','',total,totalRemaining,new Set(rows.map(r=>r.lot)).size]);
   const wsResumo=XLSX.utils.aoa_to_sheet(resumoData);
-  wsResumo['!cols']=[{wch:16},{wch:38},{wch:18},{wch:12}];
+  wsResumo['!cols']=[{wch:16},{wch:38},{wch:23},{wch:28},{wch:12}];
+  wsResumo['!autofilter']={ref:`A7:E${resumoData.length-2}`};
 
-  const detalheData=[
-    ['Data','Lote','Código','Descrição','Quantidade apontada','Fator','Chapas cortadas','Responsável','Status','Planilha de origem']
-  ];
-  rows.forEach(r=>detalheData.push([
-    r.dateText,r.lot,r.product,r.description,r.pointed,r.factor,r.quantity,r.responsible,r.status,r.sourceFile
+  // Uma única linha por número de lote. A data/responsável correspondem ao apontamento mais recente do mês.
+  const byLot=new Map();
+  rows.forEach(r=>{
+    const key=r.lot.toLocaleUpperCase();
+    if(!byLot.has(key)){
+      byLot.set(key,{
+        date:r.date, dateText:r.dateText, lot:r.lot,
+        products:new Set([r.product]), descriptions:new Set(r.description?[r.description]:[]),
+        initialQty:r.initialQty, pointed:r.pointed, factors:new Set([String(r.factor)]),
+        quantity:r.quantity, remaining:r.remaining,
+        responsible:r.responsible, statuses:new Set([r.status]),
+        sourceFiles:new Set(r.sourceFile?[r.sourceFile]:[]), movementCount:r.movementCount
+      });
+    }else{
+      const g=byLot.get(key);
+      g.products.add(r.product);
+      if(r.description)g.descriptions.add(r.description);
+      g.initialQty+=r.initialQty;
+      g.pointed+=r.pointed;
+      g.factors.add(String(r.factor));
+      g.quantity+=r.quantity;
+      g.remaining+=r.remaining;
+      g.statuses.add(r.status);
+      if(r.sourceFile)g.sourceFiles.add(r.sourceFile);
+      g.movementCount+=r.movementCount;
+      if(r.date>g.date){g.date=r.date;g.dateText=r.dateText;g.responsible=r.responsible;}
+    }
+  });
+  const detailRows=[...byLot.values()].sort((a,b)=>b.date-a.date || a.lot.localeCompare(b.lot,'pt-BR',{numeric:true}));
+  const detalheData=[[
+    'Data mais recente','Lote','Código(s)','Descrição(s)','Chapas iniciais',
+    'Quantidade apontada no mês','Fator(es)','Chapas cortadas no mês',
+    'Chapas restantes para cortar','Responsável do último apontamento',
+    'Status','Planilha(s) de origem','Nº de apontamentos no mês'
+  ]];
+  detailRows.forEach(r=>detalheData.push([
+    r.dateText,r.lot,[...r.products].join(' / '),[...r.descriptions].join(' / '),
+    r.initialQty,r.pointed,[...r.factors].join(' / '),r.quantity,r.remaining,
+    r.responsible,[...r.statuses].every(s=>s==='Concluído')?'Concluído':'Em aberto',
+    [...r.sourceFiles].join(' / '),r.movementCount
   ]));
   const wsDetalhe=XLSX.utils.aoa_to_sheet(detalheData);
   wsDetalhe['!cols']=[
-    {wch:12},{wch:16},{wch:12},{wch:34},{wch:20},{wch:10},{wch:18},{wch:32},{wch:14},{wch:28}
+    {wch:16},{wch:18},{wch:18},{wch:38},{wch:16},{wch:23},{wch:12},
+    {wch:22},{wch:27},{wch:34},{wch:14},{wch:30},{wch:22}
   ];
-  wsDetalhe['!autofilter']={ref:`A1:J${detalheData.length}`};
+  wsDetalhe['!autofilter']={ref:`A1:M${detalheData.length}`};
 
   XLSX.utils.book_append_sheet(wb,wsResumo,'Resumo');
-  XLSX.utils.book_append_sheet(wb,wsDetalhe,'Detalhado');
+  XLSX.utils.book_append_sheet(wb,wsDetalhe,'Detalhado por lote');
   XLSX.writeFile(wb,`NESHER_Chapas_Cortadas_${year}-${String(month).padStart(2,'0')}.xlsx`);
 }
 
