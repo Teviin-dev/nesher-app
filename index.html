@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <title>NESHER • Controle de Chapas</title>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#090a0b;--panel:#101113;--panel2:#17181b;--line:#3f3520;--gold:#f0bd28;--gold2:#ffd449;--text:#f5f5f5;--muted:#9f9f9f;--green:#59c16a;--green2:#1e3824;--danger:#d86666;--danger2:#351f1f;--sheet:#f4f4f4;--ink:#111;--rose:#d99a9a;}
@@ -2050,6 +2050,56 @@ function exportMonthlyCutReport(){
   const totalRemaining=rows.reduce((s,r)=>s+r.remaining,0);
   const wb=XLSX.utils.book_new();
 
+  const borderThin={
+    top:{style:'thin',color:{rgb:'000000'}},
+    bottom:{style:'thin',color:{rgb:'000000'}},
+    left:{style:'thin',color:{rgb:'000000'}},
+    right:{style:'thin',color:{rgb:'000000'}}
+  };
+  const headerStyle={
+    fill:{patternType:'solid',fgColor:{rgb:'4F81BD'}},
+    font:{name:'Arial',sz:10,bold:true,color:{rgb:'FFFFFF'}},
+    alignment:{horizontal:'center',vertical:'center',wrapText:true},
+    border:borderThin
+  };
+  const dataStyle={
+    font:{name:'Arial',sz:10,color:{rgb:'000000'}},
+    alignment:{vertical:'center',wrapText:true},
+    border:borderThin
+  };
+  const centeredStyle={
+    ...dataStyle,
+    alignment:{horizontal:'center',vertical:'center',wrapText:true},
+    border:borderThin
+  };
+  const titleStyle={
+    fill:{patternType:'solid',fgColor:{rgb:'1F4E78'}},
+    font:{name:'Arial',sz:14,bold:true,color:{rgb:'FFFFFF'}},
+    alignment:{horizontal:'center',vertical:'center'},
+    border:borderThin
+  };
+  const totalStyle={
+    fill:{patternType:'solid',fgColor:{rgb:'D9EAF7'}},
+    font:{name:'Arial',sz:10,bold:true,color:{rgb:'000000'}},
+    alignment:{vertical:'center',wrapText:true},
+    border:borderThin
+  };
+
+  function styleCell(ws, address, style){
+    if(ws[address])ws[address].s=style;
+  }
+  function styleRange(ws, range, style, centeredCols=[]){
+    const rg=XLSX.utils.decode_range(range);
+    for(let R=rg.s.r;R<=rg.e.r;R++){
+      for(let C=rg.s.c;C<=rg.e.c;C++){
+        const address=XLSX.utils.encode_cell({r:R,c:C});
+        if(!ws[address])continue;
+        ws[address].s=(R===rg.s.r)?style:(centeredCols.includes(C)?centeredStyle:dataStyle);
+      }
+    }
+  }
+
+  // ABA RESUMO
   const resumoData=[
     ['NESHER - RELATÓRIO MENSAL DE CHAPAS CORTADAS'],
     ['Período',`${monthName}/${year}`],
@@ -2064,20 +2114,36 @@ function exportMonthlyCutReport(){
   resumoData.push(['TOTAL','',total,totalRemaining,new Set(rows.map(r=>r.lot)).size]);
   const wsResumo=XLSX.utils.aoa_to_sheet(resumoData);
   wsResumo['!cols']=[{wch:16},{wch:38},{wch:23},{wch:28},{wch:12}];
-  wsResumo['!autofilter']={ref:`A7:E${resumoData.length-2}`};
+  wsResumo['!rows']=[{hpt:28},{hpt:22},{hpt:22},{hpt:22},{hpt:28},{hpt:8},{hpt:34}];
+  wsResumo['!merges']=[{s:{r:0,c:0},e:{r:0,c:4}}];
+  wsResumo['!autofilter']={ref:`A7:E${Math.max(7,resumoData.length-2)}`};
+  styleCell(wsResumo,'A1',titleStyle);
+  for(let r=1;r<=4;r++){
+    for(let c=0;c<5;c++){
+      const a=XLSX.utils.encode_cell({r,c});
+      if(wsResumo[a])wsResumo[a].s=(c===0?{...dataStyle,font:{name:'Arial',sz:10,bold:true}}:dataStyle);
+    }
+  }
+  styleRange(wsResumo,`A7:E${Math.max(7,resumoData.length-2)}`,headerStyle,[0,2,3,4]);
+  const resumoEnd=resumoData.length;
+  for(let c=0;c<5;c++){
+    const a=XLSX.utils.encode_cell({r:resumoEnd-1,c});
+    if(wsResumo[a])wsResumo[a].s=totalStyle;
+  }
+  wsResumo['!freeze']={xSplit:0,ySplit:7,topLeftCell:'A8',activePane:'bottomLeft',state:'frozen'};
 
-  // Uma única linha por número de lote. A data/responsável correspondem ao apontamento mais recente do mês.
+  // ABA DETALHADO POR LOTE — uma linha por lote, com a data mais recente do mês.
   const byLot=new Map();
   rows.forEach(r=>{
     const key=r.lot.toLocaleUpperCase();
     if(!byLot.has(key)){
       byLot.set(key,{
-        date:r.date, dateText:r.dateText, lot:r.lot,
-        products:new Set([r.product]), descriptions:new Set(r.description?[r.description]:[]),
-        initialQty:r.initialQty, pointed:r.pointed, factors:new Set([String(r.factor)]),
-        quantity:r.quantity, remaining:r.remaining,
-        responsible:r.responsible, statuses:new Set([r.status]),
-        sourceFiles:new Set(r.sourceFile?[r.sourceFile]:[]), movementCount:r.movementCount
+        date:r.date,dateText:r.dateText,lot:r.lot,
+        products:new Set([r.product]),descriptions:new Set(r.description?[r.description]:[]),
+        initialQty:r.initialQty,pointed:r.pointed,factors:new Set([String(r.factor)]),
+        quantity:r.quantity,remaining:r.remaining,
+        responsible:r.responsible,statuses:new Set([r.status]),
+        sourceFiles:new Set(r.sourceFile?[r.sourceFile]:[]),movementCount:r.movementCount
       });
     }else{
       const g=byLot.get(key);
@@ -2112,13 +2178,34 @@ function exportMonthlyCutReport(){
     {wch:16},{wch:18},{wch:18},{wch:38},{wch:16},{wch:23},{wch:12},
     {wch:22},{wch:27},{wch:34},{wch:14},{wch:30},{wch:22}
   ];
+  wsDetalhe['!rows']=[{hpt:44}];
   wsDetalhe['!autofilter']={ref:`A1:M${detalheData.length}`};
+  wsDetalhe['!freeze']={xSplit:0,ySplit:1,topLeftCell:'A2',activePane:'bottomLeft',state:'frozen'};
+  styleRange(wsDetalhe,`A1:M${detalheData.length}`,headerStyle,[0,1,2,4,5,6,7,8,10,12]);
+
+  // Formata a data e as quantidades como números legíveis no Excel.
+  detailRows.forEach((r,i)=>{
+    const excelRow=i+2;
+    const dateCell=wsDetalhe[`A${excelRow}`];
+    if(dateCell){dateCell.t='s';dateCell.s=centeredStyle;}
+    ['E','F','H','I','M'].forEach(col=>{
+      const cell=wsDetalhe[`${col}${excelRow}`];
+      if(cell){cell.t='n';cell.z='#,##0.##';cell.s=centeredStyle;}
+    });
+    ['B','C','G','K'].forEach(col=>styleCell(wsDetalhe,`${col}${excelRow}`,centeredStyle));
+  });
+  summary.forEach((r,i)=>{
+    const excelRow=i+8;
+    ['C','D','E'].forEach(col=>{
+      const cell=wsResumo[`${col}${excelRow}`];
+      if(cell){cell.t='n';cell.z='#,##0.##';cell.s=centeredStyle;}
+    });
+  });
 
   XLSX.utils.book_append_sheet(wb,wsResumo,'Resumo');
   XLSX.utils.book_append_sheet(wb,wsDetalhe,'Detalhado por lote');
   XLSX.writeFile(wb,`NESHER_Chapas_Cortadas_${year}-${String(month).padStart(2,'0')}.xlsx`);
 }
-
 
 let adminProfiles=[];
 
